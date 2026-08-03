@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quest - Questing Platform</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh}
+  .container{max-width:640px;margin:0 auto;padding:40px 20px}
+  .back{color:#888;text-decoration:none;font-size:.85rem;margin-bottom:24px;display:inline-block}
+  .back:hover{color:#fff}
+  h1{font-size:1.6rem;margin-bottom:4px}
+  .kol{color:#888;font-size:.85rem;margin-bottom:8px}
+  .desc{color:#aaa;font-size:.9rem;margin-bottom:20px;line-height:1.5}
+  .rules{background:#14141f;border:1px solid #222;border-radius:12px;padding:20px;margin-bottom:24px}
+  .rules h3{font-size:.95rem;margin-bottom:12px;color:#a78bfa}
+  .rule-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:.85rem;color:#ccc}
+  .rule-item .icon{color:#6366f1}
+  .reward-box{background:linear-gradient(135deg,#22c55e15,#10b98115);border:1px solid #22c55e30;border-radius:12px;padding:16px 20px;margin-bottom:24px;text-align:center}
+  .reward-box.perf{background:linear-gradient(135deg,#a855f715,#7c3aed15);border:1px solid #a855f730}
+  .reward-box .amount{font-size:1.5rem;font-weight:700;color:#22c55e}
+  .reward-box.perf .amount{color:#a855f7}
+  .reward-box .label{font-size:.8rem;color:#888}
+  .reward-box .type-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px}
+  .type-fixed{background:#22c55e20;color:#22c55e}
+  .type-perf{background:#a855f720;color:#a855f7}
+
+  /* Auth Section */
+  .auth-section{background:#14141f;border:1px solid #222;border-radius:12px;padding:20px;margin-bottom:24px}
+  .auth-section h3{font-size:.95rem;margin-bottom:16px;color:#a78bfa}
+  .auth-step{display:flex;align-items:center;gap:16px;padding:14px 16px;background:#1a1a2e;border-radius:10px;margin-bottom:12px;border:1px solid #222}
+  .auth-step.done{border-color:#22c55e40;background:#22c55e0a}
+  .auth-step.pending{border-color:#6366f140}
+  .auth-step .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+  .step-num.done{background:#22c55e;color:#000}
+  .step-num.pending{background:#6366f1;color:#fff}
+  .step-num.waiting{background:#333;color:#888}
+  .auth-step .step-info{flex:1}
+  .auth-step .step-label{font-size:.85rem;font-weight:600}
+  .auth-step .step-detail{font-size:.75rem;color:#888}
+  .auth-btn{padding:8px 20px;border:none;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;flex-shrink:0;transition:opacity .2s}
+  .auth-btn:hover{opacity:.85}
+  .auth-btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-wallet{background:linear-gradient(135deg,#f97316,#ef4444);color:#fff}
+  .btn-twitter{background:#1d9bf0;color:#fff}
+  .btn-connected{background:#22c55e20;color:#22c55e;border:1px solid #22c55e40;cursor:default}
+  .btn-connected:hover{opacity:1}
+
+  /* Wallet address display */
+  .wallet-addr{font-family:monospace;font-size:.78rem;color:#6366f1;word-break:break-all}
+  .x-handle{color:#1d9bf0;font-weight:600}
+
+  /* Submission Form */
+  form{background:#14141f;border:1px solid #222;border-radius:12px;padding:24px;margin-bottom:24px}
+  form.disabled{opacity:.5;pointer-events:none}
+  label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px;color:#ccc}
+  input{width:100%;padding:12px;background:#1a1a2e;border:1px solid #333;border-radius:8px;color:#fff;font-size:.9rem;margin-bottom:16px}
+  input:focus{border-color:#6366f1;outline:none}
+  button.submit-btn{width:100%;padding:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:8px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer}
+  button.submit-btn:hover{opacity:.9}
+  button.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+  button.submit-btn.perf{background:linear-gradient(135deg,#a855f7,#7c3aed)}
+  .result{margin-top:20px;padding:16px;border-radius:8px;font-size:.9rem;display:none}
+  .result-success{background:#22c55e15;border:1px solid #22c55e40;color:#22c55e}
+  .result-info{background:#a855f715;border:1px solid #a855f740;color:#a855f7}
+  .result-rejected{background:#ef444415;border:1px solid #ef444440;color:#ef4444}
+  .result-error{background:#f59e0b15;border:1px solid #f59e0b40;color:#f59e0b}
+  .tx-link{color:#6366f1;word-break:break-all}
+  .spinner{display:none;text-align:center;padding:12px;color:#888}
+  .spinner.active{display:block}
+  .keyword-tag{display:inline-block;background:#1a1a2e;border:1px solid #333;padding:2px 8px;border-radius:4px;font-size:.8rem;margin:2px}
+  .kw-found{border-color:#22c55e40;color:#22c55e}
+  .kw-missing{border-color:#ef444440;color:#ef4444}
+  .my-subs{margin-top:24px}
+  .my-subs h3{font-size:.95rem;color:#a78bfa;margin-bottom:8px}
+  .sub-item{background:#14141f;border:1px solid #222;border-radius:8px;padding:12px;margin-bottom:8px;font-size:.8rem;display:flex;justify-content:space-between;align-items:center}
+  .claim-btn{padding:6px 16px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:6px;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;width:auto}
+  .claim-btn:hover{opacity:.9}
+  .claim-btn:disabled{opacity:.4;cursor:not-allowed}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">← Back to quests</a>
+  <div id="quest-details">Loading...</div>
+
+  <!-- Auth Section -->
+  <div class="auth-section" id="auth-section" style="display:none">
+    <h3>🔐 Connect Your Accounts</h3>
+
+    <div class="auth-step" id="step-wallet">
+      <div class="step-num waiting" id="step-num-wallet">1</div>
+      <div class="step-info">
+        <div class="step-label">Connect Wallet</div>
+        <div class="step-detail" id="step-detail-wallet">Required to receive rewards</div>
+      </div>
+      <button class="auth-btn btn-wallet" id="btn-wallet" onclick="connectWallet()">🦊 Connect</button>
+    </div>
+
+    <div class="auth-step" id="step-twitter">
+      <div class="step-num waiting" id="step-num-twitter">2</div>
+      <div class="step-info">
+        <div class="step-label">Verify X (Twitter)</div>
+        <div class="step-detail" id="step-detail-twitter">Authorize to cryptographically prove you own the account</div>
+      </div>
+      <button class="auth-btn btn-twitter" id="btn-twitter" onclick="authorizeX()" disabled>🔑 Authorize X</button>
+    </div>
+
+  </div>
+
+  <!-- Submission Form -->
+  <form id="submit-form" style="display:none">
+    <label>Your Tweet URL</label>
+    <input type="text" id="tweet_url" placeholder="https://x.com/yourhandle/status/123456789" required>
+    <p style="font-size:.75rem;color:#666;margin:-12px 0 16px" id="form-hint"></p>
+    <button type="submit" class="submit-btn" id="submit-btn">Submit for Verification</button>
+  </form>
+
+  <div id="result" class="result"></div>
+  <div id="spinner" class="spinner">⏳ Verifying your tweet via X API...</div>
+
+  <div class="my-subs" id="my-subs" style="display:none">
+    <h3>📋 My Submissions</h3>
+    <div id="my-subs-list"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+<script>
+const questId = window.location.pathname.split('/').pop();
+let questData = null;
+let walletAddress = null;
+let xAuthorized = false;
+let xHandle = null;
+
+// ── Wallet Connection ────────────────────────────────────
+async function connectWallet() {
+  if (!window.ethereum) {
+    alert('No wallet detected. Please install MetaMask or another Ethereum wallet.');
+    return;
+  }
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const address = await signer.getAddress();
+
+    // Prove ownership via signature
+    const message = `Sign to verify wallet ownership for Questing Platform.\n\nWallet: ${address}\nNonce: ${Date.now()}`;
+    const signature = await signer.signMessage(message);
+
+    // Optionally verify on backend
+    try {
+      await fetch('/api/auth/verify-wallet', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ address, signature, message })
+      });
+    } catch(e) { /* non-critical */ }
+
+    walletAddress = address;
+    updateWalletUI(address);
+    checkXAuth();
+    window.history.replaceState(null, '', `?wallet=${address}`);
+  } catch(err) {
+    if (err.code === 4001) return; // user rejected
+    alert('Wallet connection failed: ' + err.message);
+  }
+}
+
+function updateWalletUI(address) {
+  document.getElementById('step-num-wallet').textContent = '✓';
+  document.getElementById('step-num-wallet').className = 'step-num done';
+  document.getElementById('step-detail-wallet').innerHTML = `<span class="wallet-addr">${address.slice(0,6)}...${address.slice(-4)}</span>`;
+  document.getElementById('btn-wallet').textContent = '✓ Connected';
+  document.getElementById('btn-wallet').className = 'auth-btn btn-connected';
+  document.getElementById('btn-wallet').onclick = null;
+  document.getElementById('step-wallet').className = 'auth-step done';
+
+  // Enable X OAuth button
+  document.getElementById('btn-twitter').disabled = false;
+
+}
+
+// ── X Handle Entry ───────────────────────────────────────
+function checkXAuth() {
+  if (!walletAddress) return;
+  // Check if OAuth session exists (future), then fall back to nothing
+  fetch(`/api/auth/status?wallet=${walletAddress}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.twitter) {
+        xAuthorized = true;
+        xHandle = data.twitter_handle;
+        updateXUI(data.twitter_handle);
+      }
+    });
+}
+
+function updateXUI(handle) {
+  document.getElementById('step-num-twitter').textContent = '✓';
+  document.getElementById('step-num-twitter').className = 'step-num done';
+  document.getElementById('step-detail-twitter').innerHTML = `Verified as <span class="x-handle">@${esc(handle)}</span>`;
+  document.getElementById('step-twitter').className = 'auth-step done';
+  showSubmitForm();
+}
+
+// OAuth still available when network allows it
+function authorizeX() {
+  if (!walletAddress) return alert('Connect wallet first');
+  const returnTo = `/quest/${questId}`;
+  window.location.href = `/auth/twitter?wallet=${encodeURIComponent(walletAddress)}&return_to=${encodeURIComponent(returnTo)}`;
+}
+
+// ── Quest Details ────────────────────────────────────────
+async function loadQuest() {
+  try {
+    const res = await fetch(`/api/quests/${questId}`);
+    if(!res.ok) { document.getElementById('quest-details').innerHTML='<p>Quest not found.</p>'; return; }
+    questData = await res.json();
+    const q = questData;
+    const keywords = JSON.parse(q.required_keywords);
+    const isFixed = q.reward_type === 'fixed';
+
+    document.getElementById('quest-details').innerHTML = `
+      <h1>${esc(q.title)}</h1>
+      <p class="kol">by @${esc(q.kol_handle)} ${q.kol_tweet_url?`<a href="${esc(q.kol_tweet_url)}" target="_blank" style="color:#6366f1">→ View KOL Tweet</a>`:''}</p>
+      <p class="desc">${esc(q.description)}</p>
+
+      <div class="rules">
+        <h3>📋 Quest Rules</h3>
+        ${q.kol_tweet_url?`<div class="rule-item"><span class="icon">🔗</span><span>Read the KOL's tweet above, then post your own</span></div>`:''}
+        <div class="rule-item"><span class="icon">🔑</span><span>Must include keywords: ${keywords.map(k=>`<span class="keyword-tag">${esc(k)}</span>`).join(' ')}</span></div>
+        <div class="rule-item"><span class="icon">📝</span><span>Minimum ${q.min_chars} characters</span></div>
+        ${q.max_chars>0?`<div class="rule-item"><span class="icon">📏</span><span>Maximum ${q.max_chars} characters</span></div>`:''}
+        <div class="rule-item"><span class="icon">🐦</span><span>Post your tweet on X, then paste the URL below</span></div>
+      </div>
+
+      <div class="reward-box ${isFixed?'':'perf'}">
+        <span class="type-badge ${isFixed?'type-fixed':'type-perf'}">${isFixed?'🎯 Fixed Reward':'🏆 Performance-Based'}</span>
+        <div class="amount">${q.reward_amount} ${q.reward_token}</div>
+        <div class="label">
+          ${isFixed
+            ? `Instant reward per verified submission · Pool: ${q.remaining_pool} ${q.reward_token}`
+            : `Top ${q.winner_count} participants ranked by engagement · Pool: ${q.total_reward_pool} ${q.reward_token}`}
+        </div>
+        <div style="color:#888;font-size:.75rem;margin-top:4px">
+          ${isFixed ? `${q.verified_count} rewarded so far` : 'Rewards distributed after campaign ends'}
+        </div>
+      </div>
+    `;
+
+    // Show auth section
+    document.getElementById('auth-section').style.display = 'block';
+
+    // Handle query params (return from OAuth, etc.)
+    handleUrlParams();
+
+    // If MetaMask already connected, auto-detect
+    autoDetectWallet();
+
+    document.getElementById('submit-form').addEventListener('submit', submitQuest);
+  } catch(e) {
+    document.getElementById('quest-details').innerHTML='<p>Failed to load quest.</p>';
+  }
+}
+
+function handleUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const w = params.get('wallet');
+  const xAuth = params.get('x_auth');
+  const xH = params.get('x_handle');
+
+  if (w && !walletAddress) {
+    walletAddress = w;
+    updateWalletUI(w);
+    checkXAuth();
+  }
+
+  if (xAuth === '1' && xH) {
+    xAuthorized = true;
+    xHandle = xH;
+    updateXUI(xH);
+  }
+
+  // Clean URL
+  if (params.has('x_auth') || params.has('x_handle')) {
+    const newParams = new URLSearchParams();
+    if (walletAddress) newParams.set('wallet', walletAddress);
+    const qs = newParams.toString();
+    window.history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+  }
+}
+
+async function autoDetectWallet() {
+  if (walletAddress) return;
+  if (!window.ethereum) return;
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts.length > 0) {
+      walletAddress = accounts[0];
+      updateWalletUI(accounts[0]);
+      checkXAuth();
+    }
+  } catch(e) { /* silent */ }
+}
+
+// Listen for account changes
+if (window.ethereum) {
+  window.ethereum.on('accountsChanged', (accounts) => {
+    if (accounts.length === 0) {
+      walletAddress = null;
+      xAuthorized = false;
+      xHandle = null;
+      window.location.reload();
+    } else if (accounts[0].toLowerCase() !== walletAddress?.toLowerCase()) {
+      walletAddress = accounts[0];
+      updateWalletUI(accounts[0]);
+      checkXAuth();
+    }
+  });
+}
+
+// ── Show Submit Form ─────────────────────────────────────
+function showSubmitForm() {
+  const form = document.getElementById('submit-form');
+  const hint = document.getElementById('form-hint');
+  const btn = document.getElementById('submit-btn');
+  const isFixed = questData.reward_type === 'fixed';
+
+  form.style.display = 'block';
+
+  if (xAuthorized && xHandle) {
+    hint.innerHTML = `Tweet must be from <span class="x-handle">@${esc(xHandle)}</span>`;
+  } else {
+    hint.textContent = 'Enter your X handle above first, then paste your tweet URL';
+  }
+
+  if (!isFixed) btn.className = 'submit-btn perf';
+  if (walletAddress) loadMySubmissions();
+}
+
+// ── Submit ───────────────────────────────────────────────
+async function submitQuest(e) {
+  e.preventDefault();
+  if (!walletAddress) return alert('Please connect your wallet first');
+
+  const tweetUrl = document.getElementById('tweet_url').value.trim();
+  const resultEl = document.getElementById('result');
+  const spinner = document.getElementById('spinner');
+  const btn = document.getElementById('submit-btn');
+
+  resultEl.style.display='none'; spinner.classList.add('active'); btn.disabled=true;
+
+  try {
+    const body = { quest_id:questId, tweet_url:tweetUrl, wallet_address:walletAddress };
+    if (xHandle) body.x_handle = xHandle;
+    const res = await fetch('/api/submissions', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    const data = await res.json();
+    spinner.classList.remove('active'); btn.disabled=false; resultEl.style.display='block';
+
+    if(data.status==='verified_and_rewarded'){
+      resultEl.className='result result-success';
+      resultEl.innerHTML=`✅ <strong>Verified & Rewarded!</strong><br>
+        Tweet: "${esc(data.tweet.text.substring(0,100))}..." by @${esc(data.tweet.author)}<br>
+        Keywords: ${data.keywords_found.map(k=>`<span class="keyword-tag kw-found">${esc(k)}</span>`).join(' ')}<br>
+        💰 <strong>${data.reward.amount} ${data.reward.token} sent!</strong><br>
+        TX: <span class="tx-link">${data.reward.tx_hash}</span>`;
+    } else if(data.status==='verified_reward_pending'){
+      resultEl.className='result result-success';
+      resultEl.innerHTML=`✅ <strong>Verified!</strong> (Reward queued)<br>
+        Tweet by @${esc(data.tweet.author)}, ${data.tweet.chars} chars<br>
+        ⚠️ ${esc(data.reward_error)}`;
+    } else if(data.status==='verified_pending_ranking'){
+      resultEl.className='result result-info';
+      resultEl.innerHTML=`✅ <strong>Verified!</strong> (Performance-Based)<br>
+        Tweet by @${esc(data.tweet.author)}, ${data.tweet.chars} chars<br>
+        Keywords: ${data.keywords_found.map(k=>`<span class="keyword-tag kw-found">${esc(k)}</span>`).join(' ')}<br>
+        📊 Your submission will be ranked by engagement after the campaign ends.<br>
+        🏆 Top ${questData.winner_count} participants win ${questData.reward_amount} ${questData.reward_token} each.<br>
+        <em>Check back after the quest completes!</em>`;
+    } else if(data.status==='rejected'){
+      resultEl.className='result result-rejected';
+      resultEl.innerHTML=`❌ <strong>Rejected</strong><br>
+        <ul style="margin-top:8px;padding-left:20px">${data.errors.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`;
+    } else {
+      resultEl.className='result result-error';
+      resultEl.innerHTML=`⚠️ ${esc(data.error)}`;
+    }
+    loadMySubmissions();
+  } catch(e){
+    spinner.classList.remove('active'); btn.disabled=false;
+    resultEl.style.display='block'; resultEl.className='result result-error';
+    resultEl.innerHTML=`⚠️ Network error`;
+  }
+}
+
+// ── My Submissions ───────────────────────────────────────
+async function loadMySubmissions() {
+  if(!walletAddress) return;
+  try {
+    const data = await fetch(`/api/submissions/${walletAddress}`).then(r=>r.json());
+    const mine = data.filter(s=>s.quest_id==parseInt(questId));
+    if(!mine.length) { document.getElementById('my-subs').style.display='none'; return; }
+    document.getElementById('my-subs').style.display='block';
+    document.getElementById('my-subs-list').innerHTML = mine.map(s=>`
+      <div class="sub-item">
+        <div>
+          <strong>Status:</strong>
+          ${s.verified===1?'✅ Verified':s.verified===-1?'❌ Rejected':'⏳ Pending'}
+          ${s.reward_sent===1?' · 💰 Rewarded':''}
+          ${s.claimed===1?' · 🎉 Claimed':''}
+          ${s.rank?` · Rank: #${s.rank}`:''}
+          ${s.engagement_score?` · Score: ${s.engagement_score.toFixed(1)}`:''}
+          <br><span style="color:#888;font-size:.7rem">@${esc(s.tweet_author||'?')} · ${s.submitted_at}</span>
+        </div>
+        <div>
+          ${questData.reward_type==='performance' && s.verified===1 && s.quest_status==='completed' && !s.claimed && !s.reward_sent && s.rank && s.rank <= questData.winner_count
+            ? `<button class="claim-btn" onclick="claimReward(${s.id})">🎁 Claim ${questData.reward_amount} ${questData.reward_token}</button>`
+            : s.reward_sent===1||s.claimed===1
+              ? `<span style="color:#22c55e;font-size:.75rem">Rewarded ✅</span>`
+              : questData.reward_type==='performance' && s.verified===1
+                ? `<span style="color:#888;font-size:.75rem">Wait for results</span>`
+                : ''}
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+async function claimReward(subId) {
+  try {
+    const res = await fetch('/api/claim', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ submission_id:subId, wallet_address:walletAddress })
+    });
+    const data = await res.json();
+    if(res.ok) {
+      alert(`🎉 Claimed ${data.reward.amount} ${data.reward.token}!\nTX: ${data.reward.tx_hash}`);
+      loadMySubmissions();
+    } else {
+      alert(data.error);
+    }
+  } catch(e) { alert('Claim failed'); }
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+loadQuest();
+</script>
+</body>
+</html>

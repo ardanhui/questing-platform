@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questing Platform</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+  .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+  h1 { font-size: 2rem; margin-bottom: 8px; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #888; margin-bottom: 32px; }
+  .quest-card { background: #14141f; border: 1px solid #222; border-radius: 12px; padding: 24px; margin-bottom: 16px; transition: border-color .2s; }
+  .quest-card:hover { border-color: #6366f1; }
+  .quest-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+  .quest-kol { color: #888; font-size: .85rem; margin-bottom: 8px; }
+  .quest-desc { color: #aaa; font-size: .9rem; margin-bottom: 12px; line-height: 1.5; }
+  .quest-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: #777; margin-bottom: 16px; }
+  .quest-meta span { background: #1a1a2e; padding: 4px 10px; border-radius: 6px; }
+  .reward-badge { background: linear-gradient(135deg, #22c55e20, #10b98120); color: #22c55e; padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: .85rem; display: inline-block; }
+  .quest-btn { display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .9rem; margin-top: 12px; }
+  .quest-btn:hover { opacity: .9; }
+  .stats-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .empty { text-align: center; padding: 60px 20px; color: #666; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: .75rem; }
+  .pill-active { background: #22c55e20; color: #22c55e; }
+  .pill-paused { background: #f59e0b20; color: #f59e0b; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎯 Questing Platform</h1>
+  <p class="subtitle">Complete quests, earn rewards. Powered by X verification.</p>
+  <div id="quests"></div>
+  <div id="empty" class="empty" style="display:none;">No active quests right now. Check back soon!</div>
+</div>
+
+<script>
+async function loadQuests() {
+  try {
+    const res = await fetch('/api/quests');
+    const quests = await res.json();
+    const el = document.getElementById('quests');
+    if (!quests.length) { document.getElementById('empty').style.display = 'block'; return; }
+
+    el.innerHTML = quests.map(q => `
+      <div class="quest-card">
+        <div class="quest-title">${esc(q.title)}</div>
+        <div class="quest-kol">by @${esc(q.kol_handle || 'unknown')}</div>
+        <div class="quest-desc">${esc(q.description || 'No description')}</div>
+        <div class="quest-meta">
+          <span>📝 Min ${q.min_chars} chars</span>
+          <span>🔑 Keywords: ${esc(JSON.parse(q.required_keywords).join(', '))}</span>
+          <span>✅ ${q.verified_count} completed</span>
+          ${q.max_submissions > 0 ? `<span>📊 ${q.verified_count}/${q.max_submissions}</span>` : ''}
+          <span style="background:#a855f720;color:#a855f7;padding:2px 6px;border-radius:4px;font-size:.7rem">${q.reward_type === 'performance' ? '🏆 Performance' : '🎯 Fixed'}</span>
+        </div>
+        <div class="stats-bar">
+          <span class="reward-badge">💰 ${q.reward_amount} ${q.reward_token} ${q.reward_type === 'performance' ? `× top ${q.winner_count}` : 'per sub'}</span>
+          <span style="color:#888;font-size:.8rem;">Pool: ${q.remaining_pool} ${q.reward_token}</span>
+        </div>
+        <a href="/quest/${q.id}" class="quest-btn" style="display:inline-block;margin-top:12px;">View Quest →</a>
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('quests').innerHTML = '<div class="empty">Failed to load quests</div>';
+  }
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+loadQuests();
+</script>
+</body>
+</html>

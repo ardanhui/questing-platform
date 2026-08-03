@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Questing Platform</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:#111118;border-right:1px solid #222;padding:24px 16px;overflow-y:auto}
+  .sidebar h2{font-size:1.1rem;margin-bottom:24px;background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sidebar a{display:block;color:#888;text-decoration:none;padding:8px 12px;border-radius:6px;margin-bottom:4px;font-size:.85rem}
+  .sidebar a:hover,.sidebar a.active{background:#1a1a2e;color:#fff}
+  .main{margin-left:220px;padding:32px}
+  h1{font-size:1.4rem;margin-bottom:24px}
+  .card{background:#14141f;border:1px solid #222;border-radius:12px;padding:20px;margin-bottom:20px}
+  .card h3{font-size:.95rem;margin-bottom:16px;color:#a78bfa}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+  .stat{background:#14141f;border:1px solid #222;border-radius:10px;padding:16px;text-align:center}
+  .stat .num{font-size:1.6rem;font-weight:700;color:#6366f1}
+  .stat .lbl{font-size:.75rem;color:#888;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:.8rem}
+  th{text-align:left;padding:8px 10px;background:#1a1a2e;color:#888;font-weight:600;border-radius:6px 6px 0 0}
+  td{padding:7px 10px;border-bottom:1px solid #1a1a2e;vertical-align:top}
+  tr:hover td{background:#1a1a2e30}
+  input,textarea,select{width:100%;padding:10px;background:#1a1a2e;border:1px solid #333;border-radius:6px;color:#fff;font-size:.85rem;margin-bottom:12px}
+  input:focus,textarea:focus,select:focus{border-color:#6366f1;outline:none}
+  textarea{min-height:60px;resize:vertical}
+  button{padding:10px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.85rem}
+  button:hover{opacity:.9}
+  button.sm{padding:6px 14px;font-size:.75rem}
+  button.danger{background:linear-gradient(135deg,#dc2626,#ef4444)}
+  button.warn{background:#f59e0b;color:#000}
+  button.green{background:linear-gradient(135deg,#16a34a,#22c55e)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
+  .badge-ok{background:#22c55e20;color:#22c55e}
+  .badge-warn{background:#f59e0b20;color:#f59e0b}
+  .badge-err{background:#ef444420;color:#ef4444}
+  .badge-info{background:#6366f120;color:#6366f1}
+  .badge-purple{background:#a855f720;color:#a855f7}
+  .flex-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .hidden{display:none}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+  .login-overlay{position:fixed;inset:0;background:#0a0a0f;display:flex;align-items:center;justify-content:center;z-index:100}
+  .login-box{background:#14141f;border:1px solid #222;border-radius:12px;padding:32px;width:340px;text-align:center}
+  .toast{position:fixed;top:16px;right:16px;background:#22c55e;color:#000;padding:12px 20px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:200;display:none}
+  .toast.err{background:#ef4444;color:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+  label{display:block;font-size:.8rem;color:#888;margin-bottom:2px}
+  .form-group{margin-bottom:4px}
+  .help{font-size:.7rem;color:#555;margin-top:-8px;margin-bottom:8px}
+  .rank-badge{display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:50%;font-weight:700;font-size:.8rem}
+  .rank-1{background:#ffd700;color:#000}
+  .rank-2{background:#c0c0c0;color:#000}
+  .rank-3{background:#cd7f32;color:#000}
+  .rank-other{background:#1a1a2e;color:#888}
+</style>
+</head>
+<body>
+<div id="login" class="login-overlay">
+  <div class="login-box">
+    <h2 style="margin-bottom:16px">🔐 Admin Login</h2>
+    <input type="password" id="login-pw" placeholder="Admin password" style="text-align:center">
+    <button onclick="login()" style="width:100%">Login</button>
+    <p id="login-err" style="color:#ef4444;font-size:.8rem;margin-top:8px;display:none">Wrong password</p>
+  </div>
+</div>
+
+<div class="sidebar">
+  <h2>🎯 Quest Admin</h2>
+  <a href="#" class="active" onclick="switchTab('quests',this)">📋 Quests</a>
+  <a href="#" onclick="switchTab('create',this)">➕ Create Quest</a>
+  <a href="#" onclick="switchTab('submissions',this)">📨 Submissions</a>
+  <a href="#" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</a>
+  <a href="#" onclick="switchTab('deposit',this)">💰 Deposit</a>
+</div>
+
+<div class="main">
+  <div class="toast" id="toast"></div>
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <!-- Quests Tab -->
+  <div id="tab-quests" class="tab-content active">
+    <h1>📋 All Quests</h1>
+    <div id="quests-table"></div>
+  </div>
+
+  <!-- Create Tab -->
+  <div id="tab-create" class="tab-content">
+    <h1>➕ Create New Quest</h1>
+    <div class="card">
+      <h3>Quest Details</h3>
+      <form id="create-form">
+        <div class="grid2">
+          <div class="form-group"><label>Title *</label><input id="c-title" required placeholder="SpaceWay IDO Awareness"></div>
+          <div class="form-group"><label>KOL X Handle</label><input id="c-kol" placeholder="@spacewaytokens"></div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea id="c-desc" placeholder="What should participants do?"></textarea></div>
+        <div class="grid2">
+          <div class="form-group"><label>KOL Tweet URL (optional)</label><input id="c-kol-tweet" placeholder="https://x.com/kol/status/..."></div>
+          <div class="form-group"><label>Required Keywords * (comma-separated)</label><input id="c-keywords" required placeholder="IDO, SPWAY, SpaceWay"></div>
+        </div>
+        <div class="grid3">
+          <div class="form-group"><label>Min Characters</label><input id="c-minchars" type="number" value="500"></div>
+          <div class="form-group"><label>Max Characters (0=unlimited)</label><input id="c-maxchars" type="number" value="0"></div>
+          <div class="form-group"><label>Max Submissions (0=unlimited)</label><input id="c-maxsubs" type="number" value="0"></div>
+        </div>
+        <div class="grid2">
+          <div class="form-group"><label>Banned Keywords (comma-separated)</label><input id="c-banned" placeholder="scam, rug"></div>
+          <div class="form-group">
+            <label>Reward Type *</label>
+            <select id="c-reward-type" onchange="toggleRewardType()">
+              <option value="fixed">🎯 Fixed — instant reward per verified submission</option>
+              <option value="performance">🏆 Performance — top KOLs ranked by engagement</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid3">
+          <div class="form-group"><label>Reward per Winner *</label><input id="c-reward" type="number" step="0.0001" required placeholder="10"></div>
+          <div class="form-group"><label>Reward Token</label>
+            <select id="c-token">
+              <option value="ETH">ETH / Native</option><option value="USDC">USDC</option><option value="USDT">USDT</option><option value="SPWAY">SPWAY</option><option value="CUSTOM">Custom ERC-20</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Token Contract (for ERC-20)</label><input id="c-token-addr" placeholder="0x..."></div>
+        </div>
+        <div class="grid3">
+          <div class="form-group"><label>Total Reward Pool *</label><input id="c-pool" type="number" step="0.0001" required placeholder="1000"></div>
+          <div class="form-group"><label>Chain RPC URL</label><input id="c-rpc" placeholder="https://mainnet.base.org"></div>
+          <div id="winner-count-group" class="form-group hidden"><label>Number of Winners *</label><input id="c-winners" type="number" min="1" placeholder="10"></div>
+        </div>
+
+        <!-- Performance weights -->
+        <div id="perf-weights" class="hidden" style="margin-top:8px">
+          <h3 style="font-size:.9rem;color:#a78bfa;margin-bottom:12px">⚖️ Engagement Score Weights</h3>
+          <p style="font-size:.75rem;color:#666;margin-bottom:12px">Score = (likes × W₁) + (retweets × W₂) + (replies × W₃) + (quotes × W₄) + (views × W₅)</p>
+          <div class="grid4">
+            <div class="form-group"><label>Likes weight</label><input id="c-w-likes" type="number" step="0.1" value="1"></div>
+            <div class="form-group"><label>Retweets weight</label><input id="c-w-retweets" type="number" step="0.1" value="2"></div>
+            <div class="form-group"><label>Replies weight</label><input id="c-w-replies" type="number" step="0.1" value="1.5"></div>
+            <div class="form-group"><label>Quotes weight</label><input id="c-w-quotes" type="number" step="0.1" value="3"></div>
+          </div>
+          <div class="form-group" style="max-width:200px"><label>Views/Impressions weight</label><input id="c-w-views" type="number" step="0.01" value="0.01"></div>
+        </div>
+
+        <button type="submit" style="margin-top:12px">Create Quest</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Submissions Tab -->
+  <div id="tab-submissions" class="tab-content">
+    <h1>📨 Submissions</h1>
+    <div style="margin-bottom:16px">
+      <select id="sub-quest-filter" onchange="loadSubmissions()" style="width:auto;min-width:250px">
+        <option value="">All Quests</option>
+      </select>
+    </div>
+    <div id="submissions-table"></div>
+  </div>
+
+  <!-- Deposit Tab -->
+  <div id="tab-deposit" class="tab-content">
+    <h1>💰 Deposit Rewards</h1>
+    <div class="card">
+      <h3>🏦 Escrow Wallet</h3>
+      <div style="background:#1a1a2e;border-radius:8px;padding:16px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <span style="color:#888;font-size:.8rem">Address:</span>
+          <code style="color:#6366f1;font-size:.85rem;word-break:break-all" id="escrow-addr">Loading...</code>
+          <button class="sm" onclick="copyEscrowAddr()">📋 Copy</button>
+        </div>
+        <div id="escrow-balances"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Quest Funding Status</h3>
+      <div id="funding-table"></div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Tab -->
+  <div id="tab-leaderboard" class="tab-content">
+    <h1>🏆 Performance Leaderboard</h1>
+    <div style="margin-bottom:16px">
+      <select id="lb-quest-filter" onchange="loadLeaderboard()" style="width:auto;min-width:250px">
+        <option value="">Select quest...</option>
+      </select>
+      <button id="calc-btn" class="green sm" onclick="calculateRankings()" style="display:none;margin-left:8px">🔄 Refresh Engagement & Rank</button>
+      <span id="lb-status" style="color:#888;font-size:.8rem;margin-left:8px"></span>
+    </div>
+    <div id="leaderboard-table"></div>
+  </div>
+</div>
+
+<script>
+let adminPassword = '';
+
+function login() {
+  adminPassword = document.getElementById('login-pw').value;
+  fetch(`/api/admin/stats?admin_password=${adminPassword}`)
+    .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+    .then(() => { document.getElementById('login').style.display='none'; init(); })
+    .catch(() => { document.getElementById('login-err').style.display='block'; });
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  el.classList.add('active');
+  if(tab==='quests') loadQuests();
+  if(tab==='submissions') loadSubmissions();
+  if(tab==='leaderboard') setupLeaderboard();
+  if(tab==='deposit') loadEscrow();
+}
+
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(err?' err':''); t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+
+function toggleRewardType() {
+  const isPerf = document.getElementById('c-reward-type').value === 'performance';
+  document.getElementById('perf-weights').classList.toggle('hidden', !isPerf);
+  document.getElementById('winner-count-group').classList.toggle('hidden', !isPerf);
+}
+
+async function init() {
+  document.getElementById('create-form').addEventListener('submit', createQuest);
+  await loadStats(); await loadQuests();
+  toggleRewardType();
+}
+
+async function loadStats() {
+  const s = await fetch(`/api/admin/stats?admin_password=${adminPassword}`).then(r=>r.json());
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat"><div class="num">${s.total_quests}</div><div class="lbl">Quests</div></div>
+    <div class="stat"><div class="num">${s.active_quests}</div><div class="lbl">Active</div></div>
+    <div class="stat"><div class="num">${s.total_submissions}</div><div class="lbl">Submissions</div></div>
+    <div class="stat"><div class="num">${s.verified}</div><div class="lbl">Verified</div></div>
+    <div class="stat"><div class="num">${s.rejected}</div><div class="lbl">Rejected</div></div>
+    <div class="stat"><div class="num">${s.rewards_sent}</div><div class="lbl">Rewards Sent</div></div>`;
+}
+
+async function loadQuests() {
+  const quests = await fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json());
+  document.getElementById('quests-table').innerHTML = `
+    <table><tr><th>ID</th><th>Title</th><th>Type</th><th>KOL</th><th>Reward</th><th>Pool</th><th>Subs</th><th>Status</th><th>Actions</th></tr>
+    ${quests.map(q=>`
+      <tr>
+        <td>${q.id}</td>
+        <td>${esc(q.title)}</td>
+        <td><span class="badge ${q.reward_type==='performance'?'badge-purple':'badge-info'}">${q.reward_type==='performance'?'🏆 Perf':'🎯 Fixed'}</span></td>
+        <td>@${esc(q.kol_handle)}</td>
+        <td>${q.reward_amount} ${q.reward_token}${q.winner_count>0?` × ${q.winner_count} winners`:''}</td>
+        <td>${q.remaining_pool}/${q.total_reward_pool}</td>
+        <td>${q.sub_count}</td>
+        <td><span class="badge badge-${q.status==='active'?'ok':q.status==='paused'?'warn':'info'}">${q.status}</span></td>
+        <td>
+          <div class="flex-row">
+            ${q.status==='active'?`<button class="sm warn" onclick="updateStatus(${q.id},'paused')">Pause</button>`:''}
+            ${q.status==='paused'?`<button class="sm" onclick="updateStatus(${q.id},'active')">Resume</button>`:''}
+            ${q.status!=='completed'?`<button class="sm danger" onclick="updateStatus(${q.id},'completed')">End</button>`:''}
+          </div>
+        </td>
+      </tr>`).join('')}
+    </table>`;
+}
+
+async function createQuest(e) {
+  e.preventDefault();
+  const isPerf = document.getElementById('c-reward-type').value === 'performance';
+  const body = {
+    title: document.getElementById('c-title').value,
+    description: document.getElementById('c-desc').value,
+    kol_handle: document.getElementById('c-kol').value,
+    kol_tweet_url: document.getElementById('c-kol-tweet').value,
+    required_keywords: document.getElementById('c-keywords').value.split(',').map(k=>k.trim()).filter(Boolean),
+    banned_keywords: document.getElementById('c-banned').value.split(',').map(k=>k.trim()).filter(Boolean),
+    min_chars: parseInt(document.getElementById('c-minchars').value)||500,
+    max_chars: parseInt(document.getElementById('c-maxchars').value)||0,
+    max_submissions: parseInt(document.getElementById('c-maxsubs').value)||0,
+    reward_amount: parseFloat(document.getElementById('c-reward').value),
+    reward_token: document.getElementById('c-token').value==='CUSTOM'?'ERC20':document.getElementById('c-token').value,
+    reward_token_address: document.getElementById('c-token-addr').value||null,
+    reward_chain: 'base',
+    rpc_url: document.getElementById('c-rpc').value||null,
+    total_reward_pool: parseFloat(document.getElementById('c-pool').value),
+    reward_type: document.getElementById('c-reward-type').value,
+    winner_count: isPerf ? parseInt(document.getElementById('c-winners').value)||0 : 0,
+  };
+  if(isPerf) {
+    body.weight_likes = parseFloat(document.getElementById('c-w-likes').value)||1;
+    body.weight_retweets = parseFloat(document.getElementById('c-w-retweets').value)||2;
+    body.weight_replies = parseFloat(document.getElementById('c-w-replies').value)||1.5;
+    body.weight_quotes = parseFloat(document.getElementById('c-w-quotes').value)||3;
+    body.weight_views = parseFloat(document.getElementById('c-w-views').value)||0.01;
+  }
+  const res = await fetch(`/api/admin/quests?admin_password=${adminPassword}`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  if(res.ok){ toast('Quest created!'); document.getElementById('create-form').reset(); toggleRewardType(); loadQuests(); loadStats(); }
+  else{ const err=await res.json(); toast(err.error, true); }
+}
+
+async function updateStatus(id,status) {
+  await fetch(`/api/admin/quests/${id}?admin_password=${adminPassword}`, {
+    method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status})
+  });
+  loadQuests(); loadStats(); toast(`Quest ${status}`);
+}
+
+async function loadSubmissions() {
+  const questId = document.getElementById('sub-quest-filter').value;
+  let url=`/api/admin/submissions?admin_password=${adminPassword}`;
+  if(questId) url+=`&quest_id=${questId}`;
+  const [subs, quests] = await Promise.all([
+    fetch(url).then(r=>r.json()),
+    fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json())
+  ]);
+  document.getElementById('sub-quest-filter').innerHTML = `<option value="">All Quests</option>`
+    + quests.map(q=>`<option value="${q.id}" ${q.id==questId?'selected':''}>#${q.id} ${esc(q.title)} [${q.reward_type}]</option>`).join('');
+  document.getElementById('submissions-table').innerHTML = `
+    <table><tr><th>ID</th><th>Quest</th><th>Wallet</th><th>X</th><th>Verified</th><th>Reward</th><th>Score</th><th>Rank</th><th>TX</th><th>Date</th></tr>
+    ${subs.map(s=>`
+      <tr>
+        <td>${s.id}</td>
+        <td>${esc(s.quest_title)} <span class="badge ${s.reward_type==='performance'?'badge-purple':'badge-info'}">${s.reward_type}</span></td>
+        <td style="font-family:monospace;font-size:.7rem">${(s.user_wallet||'').substring(0,8)}...</td>
+        <td>@${esc(s.tweet_author||'?')}</td>
+        <td>${s.verified===1?'<span class="badge badge-ok">✅</span>':s.verified===-1?`<span class="badge badge-err" title="${esc(s.reject_reason||'')}">❌</span>`:'<span class="badge badge-warn">⏳</span>'}</td>
+        <td>${s.reward_sent===1?'<span class="badge badge-ok">Sent</span>':s.claimed===1?'<span class="badge badge-purple">Claimed</span>':s.verified===1&&s.rank?`<span class="badge badge-warn">Unclaimed</span>`:'-'}</td>
+        <td>${s.engagement_score ? s.engagement_score.toFixed(1) : '-'}</td>
+        <td>${s.rank||'-'}</td>
+        <td style="font-family:monospace;font-size:.65rem">${s.reward_tx_hash?s.reward_tx_hash.substring(0,10)+'...':'-'}</td>
+        <td style="font-size:.7rem">${s.submitted_at}</td>
+      </tr>`).join('')}
+    </table>`;
+}
+
+async function setupLeaderboard() {
+  const quests = await fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json());
+  const perfQuests = quests.filter(q=>q.reward_type==='performance');
+  document.getElementById('lb-quest-filter').innerHTML = `<option value="">Select quest...</option>`
+    + perfQuests.map(q=>`<option value="${q.id}">#${q.id} ${esc(q.title)} [${q.status}]</option>`).join('');
+}
+
+async function loadLeaderboard() {
+  const questId = document.getElementById('lb-quest-filter').value;
+  if(!questId) { document.getElementById('leaderboard-table').innerHTML=''; return; }
+
+  const quest = await fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json())
+    .then(qs=>qs.find(q=>q.id==parseInt(questId)));
+  document.getElementById('calc-btn').style.display = quest.status==='completed' ? 'inline-block' : 'none';
+  document.getElementById('lb-status').textContent = quest.status==='completed' ? '✅ Campaign ended' : '⏳ Campaign still active';
+
+  const data = await fetch(`/api/quests/${questId}/leaderboard`).then(r=>r.json());
+
+  if(data.status==='pending') {
+    document.getElementById('leaderboard-table').innerHTML = '<p style="color:#888;padding:20px">Leaderboard will be available after the campaign ends and rankings are calculated.</p>';
+    return;
+  }
+
+  document.getElementById('leaderboard-table').innerHTML = `
+    <table><tr><th>Rank</th><th>Score</th><th>Wallet</th><th>X Handle</th><th>❤️Likes</th><th>🔄RT</th><th>💬Replies</th><th>📎Quotes</th><th>👁Views</th><th>Reward</th></tr>
+    ${data.rankings.map((s,i)=>{
+      let rc = 'rank-other';
+      if(s.rank===1) rc='rank-1';
+      else if(s.rank===2) rc='rank-2';
+      else if(s.rank===3) rc='rank-3';
+      const isWinner = s.rank && s.rank <= data.winner_count;
+      return `<tr style="${isWinner?'background:#22c55e08':''}">
+        <td>${s.rank ? `<span class="rank-badge ${rc}">${s.rank}</span>` : '-'}</td>
+        <td><strong>${s.engagement_score ? s.engagement_score.toFixed(1) : '-'}</strong></td>
+        <td style="font-family:monospace;font-size:.7rem">${(s.user_wallet||'').substring(0,10)}...</td>
+        <td>@${esc(s.tweet_author||'?')}</td>
+        <td>${s.engagement_likes||0}</td>
+        <td>${s.engagement_retweets||0}</td>
+        <td>${s.engagement_replies||0}</td>
+        <td>${s.engagement_quotes||0}</td>
+        <td>${s.engagement_views||0}</td>
+        <td>${isWinner ? '<span class="badge badge-ok">🏆 Winner</span>' : s.reward_sent===1 ? '<span class="badge badge-ok">Paid</span>' : '<span class="badge badge-warn">-</span>'}</td>
+      </tr>`;
+    }).join('')}
+    </table>`;
+}
+
+async function calculateRankings() {
+  const questId = document.getElementById('lb-quest-filter').value;
+  if(!questId) return;
+  document.getElementById('calc-btn').disabled = true;
+  document.getElementById('calc-btn').textContent = '⏳ Fetching engagement...';
+  try {
+    const res = await fetch(`/api/admin/calculate-rankings?admin_password=${adminPassword}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({quest_id:parseInt(questId)})
+    });
+    const data = await res.json();
+    if(res.ok) {
+      toast(`Ranked ${data.ranked} submissions. ${data.winners?.length||0} winners!`);
+      loadLeaderboard();
+    } else {
+      toast(data.error, true);
+    }
+  } catch(e) { toast(e.message, true); }
+  document.getElementById('calc-btn').disabled = false;
+  document.getElementById('calc-btn').textContent = '🔄 Refresh Engagement & Rank';
+}
+
+// ── Deposit Functions ───────────────────────────────────
+async function loadEscrow() {
+  try {
+    const data = await fetch(`/api/admin/escrow?admin_password=${adminPassword}`).then(r=>r.json());
+
+    // Escrow address
+    if (data.configured) {
+      document.getElementById('escrow-addr').textContent = data.address;
+    } else {
+      document.getElementById('escrow-addr').innerHTML = '<span style="color:#ef4444">⚠️ ESCROW_PRIVATE_KEY not set in .env</span>';
+    }
+
+    // Chain balances
+    let balHtml = '';
+    if (data.chains && Object.keys(data.chains).length > 0) {
+      for (const [chain, info] of Object.entries(data.chains)) {
+        const native = info.native;
+        balHtml += `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.8rem">
+          <span style="color:#a78bfa;min-width:80px">${chain.toUpperCase()}</span>
+          <span style="color:#22c55e">${native.balance !== null ? native.balance.toFixed(6) + ' ' + native.symbol : '❌ ' + (info.error||'RPC error')}</span>
+        </div>`;
+        for (const [token, tokenBal] of Object.entries(info.tokens)) {
+          balHtml += `<div style="padding-left:88px;font-size:.75rem;color:#888">${token}: ${tokenBal}</div>`;
+        }
+      }
+    } else if (data.configured) {
+      balHtml = '<span style="color:#888;font-size:.8rem">No on-chain balance data — check RPC or add funds first</span>';
+    } else {
+      balHtml = '<span style="color:#888;font-size:.8rem">Set ESCROW_PRIVATE_KEY in .env to enable</span>';
+    }
+    document.getElementById('escrow-balances').innerHTML = balHtml;
+
+    // Funding table
+    if (data.quest_funding && data.quest_funding.length > 0) {
+      document.getElementById('funding-table').innerHTML = `
+        <table>
+          <tr><th>ID</th><th>Quest</th><th>Type</th><th>Token</th><th>Total Pool</th><th>Remaining</th><th>Sent</th><th>Funded %</th><th>Top Up</th></tr>
+          ${data.quest_funding.map(q => {
+            const pct = q.total_reward_pool > 0 ? Math.round((q.remaining_pool / q.total_reward_pool) * 100) : 0;
+            const isPerf = q.reward_type === 'performance';
+            return `<tr>
+              <td>${q.id}</td>
+              <td>${esc(q.title)} <span class="badge ${isPerf?'badge-purple':'badge-info'}">${isPerf?'Perf':'Fixed'}</span></td>
+              <td>${isPerf?'🏆 Perf':'🎯 Fixed'}</td>
+              <td>${esc(q.reward_token)}</td>
+              <td>${q.total_reward_pool}</td>
+              <td style="color:${q.remaining_pool === 0 ? '#ef4444' : '#22c55e'}">${q.remaining_pool}</td>
+              <td style="color:#888">${q.total_sent || 0}</td>
+              <td>
+                <div style="background:#1a1a2e;border-radius:4px;height:6px;width:80px;overflow:hidden">
+                  <div style="background:${pct < 20 ? '#ef4444' : pct < 50 ? '#f59e0b' : '#22c55e'};height:100%;width:${pct}%"></div>
+                </div>
+                <span style="font-size:.65rem;color:#888">${pct}%</span>
+              </td>
+              <td>
+                <div class="flex-row">
+                  <input type="number" id="dep-amt-${q.id}" placeholder="Amount" step="0.0001" style="width:80px;margin:0;padding:6px 8px;font-size:.75rem">
+                  <button class="sm green" onclick="doDeposit(${q.id})">+ Top Up</button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </table>
+        <p style="color:#666;font-size:.7rem;margin-top:8px">💡 To deposit: send ${data.configured ? '<code style="color:#6366f1">'+data.address+'</code>' : 'funds to escrow wallet'} via MetaMask, then use "Top Up" to update the pool.</p>
+      `;
+    } else {
+      document.getElementById('funding-table').innerHTML = '<p style="color:#888;padding:16px">No quests found</p>';
+    }
+  } catch(e) {
+    document.getElementById('escrow-addr').textContent = 'Error loading';
+    document.getElementById('escrow-balances').innerHTML = '<span style="color:#ef4444">'+esc(e.message)+'</span>';
+  }
+}
+
+async function doDeposit(questId) {
+  const amountEl = document.getElementById('dep-amt-' + questId);
+  const amount = parseFloat(amountEl.value);
+  if (!amount || amount <= 0) return toast('Enter a valid amount', true);
+
+  try {
+    const res = await fetch(`/api/admin/deposit?admin_password=${adminPassword}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ quest_id: questId, amount })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      toast(`✅ Deposited ${amount} to Quest #${questId}. Remaining: ${data.new_remaining_pool}`);
+      amountEl.value = '';
+      loadEscrow();
+    } else {
+      toast(data.error, true);
+    }
+  } catch(e) { toast(e.message, true); }
+}
+
+function copyEscrowAddr() {
+  const addr = document.getElementById('escrow-addr').textContent;
+  if (addr && !addr.includes('⚠️')) {
+    navigator.clipboard.writeText(addr).then(() => toast('📋 Address copied!'));
+  }
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=(s||'').toString(); return d.innerHTML; }
+</script>
+</body>
+</html>
