@@ -2,519 +2,528 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - Questing Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console — Questboard</title>
+<link rel="stylesheet" href="/app.css">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh}
-  .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:#111118;border-right:1px solid #222;padding:24px 16px;overflow-y:auto}
-  .sidebar h2{font-size:1.1rem;margin-bottom:24px;background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .sidebar a{display:block;color:#888;text-decoration:none;padding:8px 12px;border-radius:6px;margin-bottom:4px;font-size:.85rem}
-  .sidebar a:hover,.sidebar a.active{background:#1a1a2e;color:#fff}
-  .main{margin-left:220px;padding:32px}
-  h1{font-size:1.4rem;margin-bottom:24px}
-  .card{background:#14141f;border:1px solid #222;border-radius:12px;padding:20px;margin-bottom:20px}
-  .card h3{font-size:.95rem;margin-bottom:16px;color:#a78bfa}
-  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
-  .stat{background:#14141f;border:1px solid #222;border-radius:10px;padding:16px;text-align:center}
-  .stat .num{font-size:1.6rem;font-weight:700;color:#6366f1}
-  .stat .lbl{font-size:.75rem;color:#888;margin-top:4px}
-  table{width:100%;border-collapse:collapse;font-size:.8rem}
-  th{text-align:left;padding:8px 10px;background:#1a1a2e;color:#888;font-weight:600;border-radius:6px 6px 0 0}
-  td{padding:7px 10px;border-bottom:1px solid #1a1a2e;vertical-align:top}
-  tr:hover td{background:#1a1a2e30}
-  input,textarea,select{width:100%;padding:10px;background:#1a1a2e;border:1px solid #333;border-radius:6px;color:#fff;font-size:.85rem;margin-bottom:12px}
-  input:focus,textarea:focus,select:focus{border-color:#6366f1;outline:none}
-  textarea{min-height:60px;resize:vertical}
-  button{padding:10px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.85rem}
-  button:hover{opacity:.9}
-  button.sm{padding:6px 14px;font-size:.75rem}
-  button.danger{background:linear-gradient(135deg,#dc2626,#ef4444)}
-  button.warn{background:#f59e0b;color:#000}
-  button.green{background:linear-gradient(135deg,#16a34a,#22c55e)}
-  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
-  .badge-ok{background:#22c55e20;color:#22c55e}
-  .badge-warn{background:#f59e0b20;color:#f59e0b}
-  .badge-err{background:#ef444420;color:#ef4444}
-  .badge-info{background:#6366f120;color:#6366f1}
-  .badge-purple{background:#a855f720;color:#a855f7}
-  .flex-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .hidden{display:none}
-  .tab-content{display:none}
-  .tab-content.active{display:block}
-  .login-overlay{position:fixed;inset:0;background:#0a0a0f;display:flex;align-items:center;justify-content:center;z-index:100}
-  .login-box{background:#14141f;border:1px solid #222;border-radius:12px;padding:32px;width:340px;text-align:center}
-  .toast{position:fixed;top:16px;right:16px;background:#22c55e;color:#000;padding:12px 20px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:200;display:none}
-  .toast.err{background:#ef4444;color:#fff}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-  .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
-  label{display:block;font-size:.8rem;color:#888;margin-bottom:2px}
-  .form-group{margin-bottom:4px}
-  .help{font-size:.7rem;color:#555;margin-top:-8px;margin-bottom:8px}
-  .rank-badge{display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:50%;font-weight:700;font-size:.8rem}
-  .rank-1{background:#ffd700;color:#000}
-  .rank-2{background:#c0c0c0;color:#000}
-  .rank-3{background:#cd7f32;color:#000}
-  .rank-other{background:#1a1a2e;color:#888}
+  :root { --max: 1280px; }
+  body { background-image: none; }
+  .login { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+  .login .panel { width: min(100%, 380px); padding: 28px; }
+  .login h1 { font-size: 22px; margin-bottom: 4px; }
+  .login p { color: var(--text-2); font-size: 14px; margin-bottom: 18px; }
+
+  .console { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+  .rail { border-right: 1px solid var(--line); padding: 18px 14px; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 0; height: 100vh; background: var(--ink-950); }
+  .rail .brand { padding: 6px 10px 18px; }
+  .rail a.item { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 8px; color: var(--text-2); font-weight: 500; font-size: 14px; }
+  .rail a.item:hover { background: var(--ink-800); color: var(--text); text-decoration: none; }
+  .rail a.item.active { background: var(--ink-700); color: var(--text); }
+  .rail a.item .count { font-size: 12px; color: var(--coral); font-weight: 700; }
+  .rail-foot { margin-top: auto; display: flex; flex-direction: column; gap: 6px; padding: 10px; font-size: 13px; color: var(--text-3); }
+  .content { padding: 28px clamp(16px, 3vw, 40px) 60px; }
+  .view-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .view-head h1 { font-size: 26px; }
+  .view-head .sub { color: var(--text-2); font-size: 14px; margin-top: 4px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .stat { background: var(--ink-800); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .stat .v { font-size: 24px; font-weight: 800; font-stretch: 110%; letter-spacing: -0.02em; }
+  .stat .l { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+  .two { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .feed { max-height: 560px; overflow-y: auto; }
+  @media (max-width: 1000px) { .two { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .console { grid-template-columns: 1fr; } .rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; } .rail .brand { padding: 6px 10px; } .rail-foot { margin: 0; flex-direction: row; } }
+
+  .attention { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+  .att { display: grid; grid-template-columns: 4px 1fr auto; gap: 14px; align-items: center; padding: 10px 14px 10px 0; background: var(--ink-800); border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
+  .att i { display: block; height: 100%; border-radius: 10px 0 0 10px; }
+  .att.error i { background: var(--coral); } .att.warn i { background: var(--warn); } .att.info i { background: var(--sky); }
+
+  .feed { display: flex; flex-direction: column; }
+  .feed-item { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .feed-item:last-child { border-bottom: 0; }
+  .feed-item .t { color: var(--text-3); white-space: nowrap; }
+  .feed-item .k { color: var(--text-3); font-size: 12px; }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .filters .input, .filters select { width: auto; min-width: 160px; padding: 8px 10px; }
+  .seg { display: inline-flex; background: var(--ink-800); border: 1px solid var(--line); border-radius: 9px; padding: 3px; }
+  .seg button { background: transparent; border: 0; color: var(--text-2); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .seg button.active { background: var(--ink-600); color: var(--text); }
+
+  .qcell { display: flex; align-items: center; gap: 10px; }
+  .qcell .cv { width: 32px; height: 32px; border-radius: 8px; background: var(--ink-700); display: grid; place-items: center; font-size: 16px; flex: none; }
+  .qcell a { color: var(--text); font-weight: 600; }
+  .qcell small { display: block; color: var(--text-3); font-size: 12px; }
+  .poolcell { min-width: 140px; }
+  .poolcell .progress { margin-top: 5px; }
+  .excerpt { color: var(--text-2); font-size: 13px; max-width: 380px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .checks-inline { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .checks-inline span { font-size: 11.5px; padding: 1px 7px; border-radius: 5px; background: var(--mint-soft); color: var(--mint); }
+  .checks-inline span.bad { background: var(--coral-soft); color: var(--coral); }
+
+  .form-section { padding: 20px; border-bottom: 1px solid var(--line); }
+  .form-section:last-child { border-bottom: 0; }
+  .form-section h3 { margin-bottom: 4px; }
+  .form-section .lead { color: var(--text-3); font-size: 13px; margin-bottom: 14px; }
+  .toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .toggle label { border: 1px solid var(--line-strong); border-radius: 10px; padding: 12px 14px; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; }
+  .toggle label:has(input:checked) { border-color: var(--gold); background: var(--gold-soft); }
+  .toggle input { margin-top: 3px; accent-color: var(--gold); }
+  .toggle b { display: block; font-size: 14px; }
+  .toggle small { color: var(--text-2); font-size: 12.5px; }
+  .form-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; background: var(--ink-950); border-radius: 0 0 var(--radius) var(--radius); }
+
+  .drawer-back { position: fixed; inset: 0; background: rgba(5,10,20,.6); z-index: 60; display: flex; justify-content: flex-end; }
+  .drawer { width: min(100%, 720px); height: 100%; background: var(--ink-900); border-left: 1px solid var(--line-strong); overflow-y: auto; padding: 24px; animation: slide 200ms ease-out; }
+  @keyframes slide { from { transform: translateX(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .drawer h2 { font-size: 20px; margin-bottom: 4px; }
+  .check-list { list-style: none; margin: 10px 0 0; padding: 0; }
+  .check-list li { display: flex; gap: 8px; font-size: 13.5px; padding: 4px 0; }
+  .check-list li b { font-weight: 600; }
+  .check-list li.bad { color: var(--coral); }
+  .post-full { white-space: pre-wrap; background: var(--ink-950); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14px; line-height: 1.5; margin-top: 12px; }
+  .balance-row.short td { background: rgba(255,106,92,.06); }
+  .addr { display: inline-flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body>
-<div id="login" class="login-overlay">
-  <div class="login-box">
-    <h2 style="margin-bottom:16px">🔐 Admin Login</h2>
-    <input type="password" id="login-pw" placeholder="Admin password" style="text-align:center">
-    <button onclick="login()" style="width:100%">Login</button>
-    <p id="login-err" style="color:#ef4444;font-size:.8rem;margin-top:8px;display:none">Wrong password</p>
+<div id="login" class="login hidden">
+  <div class="panel">
+    <h1 class="display">Console</h1>
+    <p>Sign in to manage quests, payouts and the escrow wallet.</p>
+    <form id="login-form">
+      <div class="field"><label for="pw">Admin password</label><input class="input" type="password" id="pw" autocomplete="current-password" required></div>
+      <div class="form-err coral small hidden" id="login-err" style="margin:-6px 0 12px"></div>
+      <button class="btn btn-primary btn-block btn-lg" type="submit">Sign in</button>
+    </form>
+    <p class="small faint" style="margin:14px 0 0" id="login-hint"></p>
   </div>
 </div>
 
-<div class="sidebar">
-  <h2>🎯 Quest Admin</h2>
-  <a href="#" class="active" onclick="switchTab('quests',this)">📋 Quests</a>
-  <a href="#" onclick="switchTab('create',this)">➕ Create Quest</a>
-  <a href="#" onclick="switchTab('submissions',this)">📨 Submissions</a>
-  <a href="#" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</a>
-  <a href="#" onclick="switchTab('deposit',this)">💰 Deposit</a>
+<div id="console" class="console hidden">
+  <aside class="rail">
+    <a class="brand" href="/"><span class="brand-mark"></span><span id="rail-brand">Questboard</span></a>
+    <a class="item" href="#overview">Overview<span class="count" id="c-att"></span></a>
+    <a class="item" href="#quests">Quests</a>
+    <a class="item" href="#submissions">Submissions</a>
+    <a class="item" href="#payouts">Payouts<span class="count" id="c-fail"></span></a>
+    <a class="item" href="#treasury">Treasury</a>
+    <a class="item" href="#system">System</a>
+    <div class="rail-foot">
+      <span id="mode-tag"></span>
+      <a href="/">View the board</a>
+      <a href="#" id="logout">Sign out</a>
+    </div>
+  </aside>
+  <main class="content"><div id="view"></div></main>
 </div>
+<div id="drawer-host"></div>
 
-<div class="main">
-  <div class="toast" id="toast"></div>
-  <div class="stats-grid" id="stats-grid"></div>
-
-  <!-- Quests Tab -->
-  <div id="tab-quests" class="tab-content active">
-    <h1>📋 All Quests</h1>
-    <div id="quests-table"></div>
-  </div>
-
-  <!-- Create Tab -->
-  <div id="tab-create" class="tab-content">
-    <h1>➕ Create New Quest</h1>
-    <div class="card">
-      <h3>Quest Details</h3>
-      <form id="create-form">
-        <div class="grid2">
-          <div class="form-group"><label>Title *</label><input id="c-title" required placeholder="SpaceWay IDO Awareness"></div>
-          <div class="form-group"><label>KOL X Handle</label><input id="c-kol" placeholder="@spacewaytokens"></div>
-        </div>
-        <div class="form-group"><label>Description</label><textarea id="c-desc" placeholder="What should participants do?"></textarea></div>
-        <div class="grid2">
-          <div class="form-group"><label>KOL Tweet URL (optional)</label><input id="c-kol-tweet" placeholder="https://x.com/kol/status/..."></div>
-          <div class="form-group"><label>Required Keywords * (comma-separated)</label><input id="c-keywords" required placeholder="IDO, SPWAY, SpaceWay"></div>
-        </div>
-        <div class="grid3">
-          <div class="form-group"><label>Min Characters</label><input id="c-minchars" type="number" value="500"></div>
-          <div class="form-group"><label>Max Characters (0=unlimited)</label><input id="c-maxchars" type="number" value="0"></div>
-          <div class="form-group"><label>Max Submissions (0=unlimited)</label><input id="c-maxsubs" type="number" value="0"></div>
-        </div>
-        <div class="grid2">
-          <div class="form-group"><label>Banned Keywords (comma-separated)</label><input id="c-banned" placeholder="scam, rug"></div>
-          <div class="form-group">
-            <label>Reward Type *</label>
-            <select id="c-reward-type" onchange="toggleRewardType()">
-              <option value="fixed">🎯 Fixed — instant reward per verified submission</option>
-              <option value="performance">🏆 Performance — top KOLs ranked by engagement</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid3">
-          <div class="form-group"><label>Reward per Winner *</label><input id="c-reward" type="number" step="0.0001" required placeholder="10"></div>
-          <div class="form-group"><label>Reward Token</label>
-            <select id="c-token">
-              <option value="ETH">ETH / Native</option><option value="USDC">USDC</option><option value="USDT">USDT</option><option value="SPWAY">SPWAY</option><option value="CUSTOM">Custom ERC-20</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Token Contract (for ERC-20)</label><input id="c-token-addr" placeholder="0x..."></div>
-        </div>
-        <div class="grid3">
-          <div class="form-group"><label>Total Reward Pool *</label><input id="c-pool" type="number" step="0.0001" required placeholder="1000"></div>
-          <div class="form-group"><label>Chain RPC URL</label><input id="c-rpc" placeholder="https://mainnet.base.org"></div>
-          <div id="winner-count-group" class="form-group hidden"><label>Number of Winners *</label><input id="c-winners" type="number" min="1" placeholder="10"></div>
-        </div>
-
-        <!-- Performance weights -->
-        <div id="perf-weights" class="hidden" style="margin-top:8px">
-          <h3 style="font-size:.9rem;color:#a78bfa;margin-bottom:12px">⚖️ Engagement Score Weights</h3>
-          <p style="font-size:.75rem;color:#666;margin-bottom:12px">Score = (likes × W₁) + (retweets × W₂) + (replies × W₃) + (quotes × W₄) + (views × W₅)</p>
-          <div class="grid4">
-            <div class="form-group"><label>Likes weight</label><input id="c-w-likes" type="number" step="0.1" value="1"></div>
-            <div class="form-group"><label>Retweets weight</label><input id="c-w-retweets" type="number" step="0.1" value="2"></div>
-            <div class="form-group"><label>Replies weight</label><input id="c-w-replies" type="number" step="0.1" value="1.5"></div>
-            <div class="form-group"><label>Quotes weight</label><input id="c-w-quotes" type="number" step="0.1" value="3"></div>
-          </div>
-          <div class="form-group" style="max-width:200px"><label>Views/Impressions weight</label><input id="c-w-views" type="number" step="0.01" value="0.01"></div>
-        </div>
-
-        <button type="submit" style="margin-top:12px">Create Quest</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Submissions Tab -->
-  <div id="tab-submissions" class="tab-content">
-    <h1>📨 Submissions</h1>
-    <div style="margin-bottom:16px">
-      <select id="sub-quest-filter" onchange="loadSubmissions()" style="width:auto;min-width:250px">
-        <option value="">All Quests</option>
-      </select>
-    </div>
-    <div id="submissions-table"></div>
-  </div>
-
-  <!-- Deposit Tab -->
-  <div id="tab-deposit" class="tab-content">
-    <h1>💰 Deposit Rewards</h1>
-    <div class="card">
-      <h3>🏦 Escrow Wallet</h3>
-      <div style="background:#1a1a2e;border-radius:8px;padding:16px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <span style="color:#888;font-size:.8rem">Address:</span>
-          <code style="color:#6366f1;font-size:.85rem;word-break:break-all" id="escrow-addr">Loading...</code>
-          <button class="sm" onclick="copyEscrowAddr()">📋 Copy</button>
-        </div>
-        <div id="escrow-balances"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>📊 Quest Funding Status</h3>
-      <div id="funding-table"></div>
-    </div>
-  </div>
-
-  <!-- Leaderboard Tab -->
-  <div id="tab-leaderboard" class="tab-content">
-    <h1>🏆 Performance Leaderboard</h1>
-    <div style="margin-bottom:16px">
-      <select id="lb-quest-filter" onchange="loadLeaderboard()" style="width:auto;min-width:250px">
-        <option value="">Select quest...</option>
-      </select>
-      <button id="calc-btn" class="green sm" onclick="calculateRankings()" style="display:none;margin-left:8px">🔄 Refresh Engagement & Rank</button>
-      <span id="lb-status" style="color:#888;font-size:.8rem;margin-left:8px"></span>
-    </div>
-    <div id="leaderboard-table"></div>
-  </div>
-</div>
-
+<script src="/app.js"></script>
 <script>
-let adminPassword = '';
+(async function () {
+  const { esc, amount, int, ago, until, mask } = QB;
+  const api = QB.api;
+  const cfg = await QB.config();
+  document.title = `Console — ${cfg.brand.name}`;
+  document.getElementById('rail-brand').textContent = cfg.brand.name;
+  document.getElementById('mode-tag').innerHTML = cfg.demo ? '<span class="demo-tag">Demo mode</span>' : `<span class="small">Posts via ${esc(cfg.provider.label)}</span>`;
+  if (cfg.demo) document.getElementById('login-hint').textContent = 'Demo password: admin123';
 
-function login() {
-  adminPassword = document.getElementById('login-pw').value;
-  fetch(`/api/admin/stats?admin_password=${adminPassword}`)
-    .then(r => { if(!r.ok) throw new Error(); return r.json(); })
-    .then(() => { document.getElementById('login').style.display='none'; init(); })
-    .catch(() => { document.getElementById('login-err').style.display='block'; });
-}
-
-function switchTab(tab, el) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  el.classList.add('active');
-  if(tab==='quests') loadQuests();
-  if(tab==='submissions') loadSubmissions();
-  if(tab==='leaderboard') setupLeaderboard();
-  if(tab==='deposit') loadEscrow();
-}
-
-function toast(msg, err) {
-  const t = document.getElementById('toast');
-  t.textContent=msg; t.className='toast'+(err?' err':''); t.style.display='block';
-  setTimeout(()=>t.style.display='none',3000);
-}
-
-function toggleRewardType() {
-  const isPerf = document.getElementById('c-reward-type').value === 'performance';
-  document.getElementById('perf-weights').classList.toggle('hidden', !isPerf);
-  document.getElementById('winner-count-group').classList.toggle('hidden', !isPerf);
-}
-
-async function init() {
-  document.getElementById('create-form').addEventListener('submit', createQuest);
-  await loadStats(); await loadQuests();
-  toggleRewardType();
-}
-
-async function loadStats() {
-  const s = await fetch(`/api/admin/stats?admin_password=${adminPassword}`).then(r=>r.json());
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat"><div class="num">${s.total_quests}</div><div class="lbl">Quests</div></div>
-    <div class="stat"><div class="num">${s.active_quests}</div><div class="lbl">Active</div></div>
-    <div class="stat"><div class="num">${s.total_submissions}</div><div class="lbl">Submissions</div></div>
-    <div class="stat"><div class="num">${s.verified}</div><div class="lbl">Verified</div></div>
-    <div class="stat"><div class="num">${s.rejected}</div><div class="lbl">Rejected</div></div>
-    <div class="stat"><div class="num">${s.rewards_sent}</div><div class="lbl">Rewards Sent</div></div>`;
-}
-
-async function loadQuests() {
-  const quests = await fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json());
-  document.getElementById('quests-table').innerHTML = `
-    <table><tr><th>ID</th><th>Title</th><th>Type</th><th>KOL</th><th>Reward</th><th>Pool</th><th>Subs</th><th>Status</th><th>Actions</th></tr>
-    ${quests.map(q=>`
-      <tr>
-        <td>${q.id}</td>
-        <td>${esc(q.title)}</td>
-        <td><span class="badge ${q.reward_type==='performance'?'badge-purple':'badge-info'}">${q.reward_type==='performance'?'🏆 Perf':'🎯 Fixed'}</span></td>
-        <td>@${esc(q.kol_handle)}</td>
-        <td>${q.reward_amount} ${q.reward_token}${q.winner_count>0?` × ${q.winner_count} winners`:''}</td>
-        <td>${q.remaining_pool}/${q.total_reward_pool}</td>
-        <td>${q.sub_count}</td>
-        <td><span class="badge badge-${q.status==='active'?'ok':q.status==='paused'?'warn':'info'}">${q.status}</span></td>
-        <td>
-          <div class="flex-row">
-            ${q.status==='active'?`<button class="sm warn" onclick="updateStatus(${q.id},'paused')">Pause</button>`:''}
-            ${q.status==='paused'?`<button class="sm" onclick="updateStatus(${q.id},'active')">Resume</button>`:''}
-            ${q.status!=='completed'?`<button class="sm danger" onclick="updateStatus(${q.id},'completed')">End</button>`:''}
-          </div>
-        </td>
-      </tr>`).join('')}
-    </table>`;
-}
-
-async function createQuest(e) {
-  e.preventDefault();
-  const isPerf = document.getElementById('c-reward-type').value === 'performance';
-  const body = {
-    title: document.getElementById('c-title').value,
-    description: document.getElementById('c-desc').value,
-    kol_handle: document.getElementById('c-kol').value,
-    kol_tweet_url: document.getElementById('c-kol-tweet').value,
-    required_keywords: document.getElementById('c-keywords').value.split(',').map(k=>k.trim()).filter(Boolean),
-    banned_keywords: document.getElementById('c-banned').value.split(',').map(k=>k.trim()).filter(Boolean),
-    min_chars: parseInt(document.getElementById('c-minchars').value)||500,
-    max_chars: parseInt(document.getElementById('c-maxchars').value)||0,
-    max_submissions: parseInt(document.getElementById('c-maxsubs').value)||0,
-    reward_amount: parseFloat(document.getElementById('c-reward').value),
-    reward_token: document.getElementById('c-token').value==='CUSTOM'?'ERC20':document.getElementById('c-token').value,
-    reward_token_address: document.getElementById('c-token-addr').value||null,
-    reward_chain: 'base',
-    rpc_url: document.getElementById('c-rpc').value||null,
-    total_reward_pool: parseFloat(document.getElementById('c-pool').value),
-    reward_type: document.getElementById('c-reward-type').value,
-    winner_count: isPerf ? parseInt(document.getElementById('c-winners').value)||0 : 0,
-  };
-  if(isPerf) {
-    body.weight_likes = parseFloat(document.getElementById('c-w-likes').value)||1;
-    body.weight_retweets = parseFloat(document.getElementById('c-w-retweets').value)||2;
-    body.weight_replies = parseFloat(document.getElementById('c-w-replies').value)||1.5;
-    body.weight_quotes = parseFloat(document.getElementById('c-w-quotes').value)||3;
-    body.weight_views = parseFloat(document.getElementById('c-w-views').value)||0.01;
-  }
-  const res = await fetch(`/api/admin/quests?admin_password=${adminPassword}`, {
-    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
-  });
-  if(res.ok){ toast('Quest created!'); document.getElementById('create-form').reset(); toggleRewardType(); loadQuests(); loadStats(); }
-  else{ const err=await res.json(); toast(err.error, true); }
-}
-
-async function updateStatus(id,status) {
-  await fetch(`/api/admin/quests/${id}?admin_password=${adminPassword}`, {
-    method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status})
-  });
-  loadQuests(); loadStats(); toast(`Quest ${status}`);
-}
-
-async function loadSubmissions() {
-  const questId = document.getElementById('sub-quest-filter').value;
-  let url=`/api/admin/submissions?admin_password=${adminPassword}`;
-  if(questId) url+=`&quest_id=${questId}`;
-  const [subs, quests] = await Promise.all([
-    fetch(url).then(r=>r.json()),
-    fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json())
-  ]);
-  document.getElementById('sub-quest-filter').innerHTML = `<option value="">All Quests</option>`
-    + quests.map(q=>`<option value="${q.id}" ${q.id==questId?'selected':''}>#${q.id} ${esc(q.title)} [${q.reward_type}]</option>`).join('');
-  document.getElementById('submissions-table').innerHTML = `
-    <table><tr><th>ID</th><th>Quest</th><th>Wallet</th><th>X</th><th>Verified</th><th>Reward</th><th>Score</th><th>Rank</th><th>TX</th><th>Date</th></tr>
-    ${subs.map(s=>`
-      <tr>
-        <td>${s.id}</td>
-        <td>${esc(s.quest_title)} <span class="badge ${s.reward_type==='performance'?'badge-purple':'badge-info'}">${s.reward_type}</span></td>
-        <td style="font-family:monospace;font-size:.7rem">${(s.user_wallet||'').substring(0,8)}...</td>
-        <td>@${esc(s.tweet_author||'?')}</td>
-        <td>${s.verified===1?'<span class="badge badge-ok">✅</span>':s.verified===-1?`<span class="badge badge-err" title="${esc(s.reject_reason||'')}">❌</span>`:'<span class="badge badge-warn">⏳</span>'}</td>
-        <td>${s.reward_sent===1?'<span class="badge badge-ok">Sent</span>':s.claimed===1?'<span class="badge badge-purple">Claimed</span>':s.verified===1&&s.rank?`<span class="badge badge-warn">Unclaimed</span>`:'-'}</td>
-        <td>${s.engagement_score ? s.engagement_score.toFixed(1) : '-'}</td>
-        <td>${s.rank||'-'}</td>
-        <td style="font-family:monospace;font-size:.65rem">${s.reward_tx_hash?s.reward_tx_hash.substring(0,10)+'...':'-'}</td>
-        <td style="font-size:.7rem">${s.submitted_at}</td>
-      </tr>`).join('')}
-    </table>`;
-}
-
-async function setupLeaderboard() {
-  const quests = await fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json());
-  const perfQuests = quests.filter(q=>q.reward_type==='performance');
-  document.getElementById('lb-quest-filter').innerHTML = `<option value="">Select quest...</option>`
-    + perfQuests.map(q=>`<option value="${q.id}">#${q.id} ${esc(q.title)} [${q.status}]</option>`).join('');
-}
-
-async function loadLeaderboard() {
-  const questId = document.getElementById('lb-quest-filter').value;
-  if(!questId) { document.getElementById('leaderboard-table').innerHTML=''; return; }
-
-  const quest = await fetch(`/api/admin/quests?admin_password=${adminPassword}`).then(r=>r.json())
-    .then(qs=>qs.find(q=>q.id==parseInt(questId)));
-  document.getElementById('calc-btn').style.display = quest.status==='completed' ? 'inline-block' : 'none';
-  document.getElementById('lb-status').textContent = quest.status==='completed' ? '✅ Campaign ended' : '⏳ Campaign still active';
-
-  const data = await fetch(`/api/quests/${questId}/leaderboard`).then(r=>r.json());
-
-  if(data.status==='pending') {
-    document.getElementById('leaderboard-table').innerHTML = '<p style="color:#888;padding:20px">Leaderboard will be available after the campaign ends and rankings are calculated.</p>';
+  // ── auth ──────────────────────────────────────────────
+  const { admin } = await api('GET', '/api/admin/session');
+  if (!admin) {
+    document.getElementById('login').classList.remove('hidden');
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('login-err');
+      try { await api('POST', '/api/admin/login', { password: document.getElementById('pw').value }); location.reload(); }
+      catch (ex) { err.textContent = ex.message; err.classList.remove('hidden'); }
+    });
     return;
   }
+  document.getElementById('console').classList.remove('hidden');
+  document.getElementById('logout').addEventListener('click', async (e) => { e.preventDefault(); await api('POST', '/api/admin/logout'); location.reload(); });
 
-  document.getElementById('leaderboard-table').innerHTML = `
-    <table><tr><th>Rank</th><th>Score</th><th>Wallet</th><th>X Handle</th><th>❤️Likes</th><th>🔄RT</th><th>💬Replies</th><th>📎Quotes</th><th>👁Views</th><th>Reward</th></tr>
-    ${data.rankings.map((s,i)=>{
-      let rc = 'rank-other';
-      if(s.rank===1) rc='rank-1';
-      else if(s.rank===2) rc='rank-2';
-      else if(s.rank===3) rc='rank-3';
-      const isWinner = s.rank && s.rank <= data.winner_count;
-      return `<tr style="${isWinner?'background:#22c55e08':''}">
-        <td>${s.rank ? `<span class="rank-badge ${rc}">${s.rank}</span>` : '-'}</td>
-        <td><strong>${s.engagement_score ? s.engagement_score.toFixed(1) : '-'}</strong></td>
-        <td style="font-family:monospace;font-size:.7rem">${(s.user_wallet||'').substring(0,10)}...</td>
-        <td>@${esc(s.tweet_author||'?')}</td>
-        <td>${s.engagement_likes||0}</td>
-        <td>${s.engagement_retweets||0}</td>
-        <td>${s.engagement_replies||0}</td>
-        <td>${s.engagement_quotes||0}</td>
-        <td>${s.engagement_views||0}</td>
-        <td>${isWinner ? '<span class="badge badge-ok">🏆 Winner</span>' : s.reward_sent===1 ? '<span class="badge badge-ok">Paid</span>' : '<span class="badge badge-warn">-</span>'}</td>
-      </tr>`;
-    }).join('')}
-    </table>`;
-}
+  const view = document.getElementById('view');
+  const chains = cfg.chains;
 
-async function calculateRankings() {
-  const questId = document.getElementById('lb-quest-filter').value;
-  if(!questId) return;
-  document.getElementById('calc-btn').disabled = true;
-  document.getElementById('calc-btn').textContent = '⏳ Fetching engagement...';
-  try {
-    const res = await fetch(`/api/admin/calculate-rankings?admin_password=${adminPassword}`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({quest_id:parseInt(questId)})
-    });
-    const data = await res.json();
-    if(res.ok) {
-      toast(`Ranked ${data.ranked} submissions. ${data.winners?.length||0} winners!`);
-      loadLeaderboard();
-    } else {
-      toast(data.error, true);
-    }
-  } catch(e) { toast(e.message, true); }
-  document.getElementById('calc-btn').disabled = false;
-  document.getElementById('calc-btn').textContent = '🔄 Refresh Engagement & Rank';
-}
+  // ── shared renderers ──────────────────────────────────
+  const statusTag = (s) => ({ active: '<span class="tag tag-active">Active</span>', scheduled: '<span class="tag tag-scheduled">Scheduled</span>', paused: '<span class="tag tag-paused">Paused</span>', completed: '<span class="tag tag-completed">Completed</span>' }[s] || `<span class="tag tag-neutral">${esc(s)}</span>`);
+  const rewardTag = (r) => !r ? '<span class="faint">—</span>' : r.status === 'sent' ? `<span class="tag tag-sent plain">${r.simulated ? 'Simulated' : 'Paid'}</span>` : r.status === 'failed' ? '<span class="tag tag-failed plain">Failed</span>' : '<span class="tag tag-queued plain">Queued</span>';
+  const typeTag = (t) => t === 'performance' ? '<span class="tag tag-completed plain">Ranked</span>' : '<span class="tag tag-neutral plain">Per post</span>';
+  const questCell = (q) => `<div class="qcell"><span class="cv">${esc(q.cover || '🎯')}</span><div><a href="#quests/${q.id}">${esc(q.title)}</a><small>@${esc(q.kol_handle || '—')}</small></div></div>`;
+  const poolCell = (q) => {
+    const used = q.reward.total_pool ? 100 - (q.reward.remaining_pool / q.reward.total_pool) * 100 : 0;
+    return `<div class="poolcell"><span class="small">${amount(q.reward.remaining_pool)} of ${amount(q.reward.total_pool)} ${esc(q.reward.token)}</span><div class="progress"><i style="width:${Math.min(100, used)}%"></i></div></div>`;
+  };
+  const windowCell = (q) => q.status === 'completed' ? `<span class="small muted">Ended ${QB.dateShort(q.ends_at || q.finalized_at)}</span>` : q.status === 'scheduled' ? `<span class="small muted">Opens in ${until(q.starts_at)}</span>` : q.ends_at ? `<span class="small muted">Ends in ${until(q.ends_at)}</span>` : '<span class="small faint">No end</span>';
+  const checksInline = (s) => `<div class="checks-inline">${(s.checks || []).map((c) => `<span class="${c.ok ? '' : 'bad'}" title="${esc(c.detail || '')}">${esc(c.label.replace(/^Posted by your linked X account$/, 'Author').replace(/^Includes every required keyword$/, 'Keywords').replace(/^Includes at least one required keyword$/, 'Keywords').replace(/^Posted during the quest window$/, 'Timing').replace(/^No banned words$/, 'Banned').replace(/^Mentions .*/, 'Mentions').replace(/characters$/, 'chars'))}</span>`).join('')}</div>`;
 
-// ── Deposit Functions ───────────────────────────────────
-async function loadEscrow() {
-  try {
-    const data = await fetch(`/api/admin/escrow?admin_password=${adminPassword}`).then(r=>r.json());
-
-    // Escrow address
-    if (data.configured) {
-      document.getElementById('escrow-addr').textContent = data.address;
-    } else {
-      document.getElementById('escrow-addr').innerHTML = '<span style="color:#ef4444">⚠️ ESCROW_PRIVATE_KEY not set in .env</span>';
-    }
-
-    // Chain balances
-    let balHtml = '';
-    if (data.chains && Object.keys(data.chains).length > 0) {
-      for (const [chain, info] of Object.entries(data.chains)) {
-        const native = info.native;
-        balHtml += `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.8rem">
-          <span style="color:#a78bfa;min-width:80px">${chain.toUpperCase()}</span>
-          <span style="color:#22c55e">${native.balance !== null ? native.balance.toFixed(6) + ' ' + native.symbol : '❌ ' + (info.error||'RPC error')}</span>
-        </div>`;
-        for (const [token, tokenBal] of Object.entries(info.tokens)) {
-          balHtml += `<div style="padding-left:88px;font-size:.75rem;color:#888">${token}: ${tokenBal}</div>`;
-        }
-      }
-    } else if (data.configured) {
-      balHtml = '<span style="color:#888;font-size:.8rem">No on-chain balance data — check RPC or add funds first</span>';
-    } else {
-      balHtml = '<span style="color:#888;font-size:.8rem">Set ESCROW_PRIVATE_KEY in .env to enable</span>';
-    }
-    document.getElementById('escrow-balances').innerHTML = balHtml;
-
-    // Funding table
-    if (data.quest_funding && data.quest_funding.length > 0) {
-      document.getElementById('funding-table').innerHTML = `
-        <table>
-          <tr><th>ID</th><th>Quest</th><th>Type</th><th>Token</th><th>Total Pool</th><th>Remaining</th><th>Sent</th><th>Funded %</th><th>Top Up</th></tr>
-          ${data.quest_funding.map(q => {
-            const pct = q.total_reward_pool > 0 ? Math.round((q.remaining_pool / q.total_reward_pool) * 100) : 0;
-            const isPerf = q.reward_type === 'performance';
-            return `<tr>
-              <td>${q.id}</td>
-              <td>${esc(q.title)} <span class="badge ${isPerf?'badge-purple':'badge-info'}">${isPerf?'Perf':'Fixed'}</span></td>
-              <td>${isPerf?'🏆 Perf':'🎯 Fixed'}</td>
-              <td>${esc(q.reward_token)}</td>
-              <td>${q.total_reward_pool}</td>
-              <td style="color:${q.remaining_pool === 0 ? '#ef4444' : '#22c55e'}">${q.remaining_pool}</td>
-              <td style="color:#888">${q.total_sent || 0}</td>
-              <td>
-                <div style="background:#1a1a2e;border-radius:4px;height:6px;width:80px;overflow:hidden">
-                  <div style="background:${pct < 20 ? '#ef4444' : pct < 50 ? '#f59e0b' : '#22c55e'};height:100%;width:${pct}%"></div>
-                </div>
-                <span style="font-size:.65rem;color:#888">${pct}%</span>
-              </td>
-              <td>
-                <div class="flex-row">
-                  <input type="number" id="dep-amt-${q.id}" placeholder="Amount" step="0.0001" style="width:80px;margin:0;padding:6px 8px;font-size:.75rem">
-                  <button class="sm green" onclick="doDeposit(${q.id})">+ Top Up</button>
-                </div>
-              </td>
-            </tr>`;
-          }).join('')}
-        </table>
-        <p style="color:#666;font-size:.7rem;margin-top:8px">💡 To deposit: send ${data.configured ? '<code style="color:#6366f1">'+data.address+'</code>' : 'funds to escrow wallet'} via MetaMask, then use "Top Up" to update the pool.</p>
-      `;
-    } else {
-      document.getElementById('funding-table').innerHTML = '<p style="color:#888;padding:16px">No quests found</p>';
-    }
-  } catch(e) {
-    document.getElementById('escrow-addr').textContent = 'Error loading';
-    document.getElementById('escrow-balances').innerHTML = '<span style="color:#ef4444">'+esc(e.message)+'</span>';
+  async function act(fn, okMsg) {
+    try { const out = await fn(); if (okMsg) QB.toast(okMsg, 'ok'); return out; }
+    catch (e) { QB.toast(e.message, 'err'); throw e; }
   }
-}
 
-async function doDeposit(questId) {
-  const amountEl = document.getElementById('dep-amt-' + questId);
-  const amount = parseFloat(amountEl.value);
-  if (!amount || amount <= 0) return toast('Enter a valid amount', true);
-
-  try {
-    const res = await fetch(`/api/admin/deposit?admin_password=${adminPassword}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ quest_id: questId, amount })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      toast(`✅ Deposited ${amount} to Quest #${questId}. Remaining: ${data.new_remaining_pool}`);
-      amountEl.value = '';
-      loadEscrow();
-    } else {
-      toast(data.error, true);
-    }
-  } catch(e) { toast(e.message, true); }
-}
-
-function copyEscrowAddr() {
-  const addr = document.getElementById('escrow-addr').textContent;
-  if (addr && !addr.includes('⚠️')) {
-    navigator.clipboard.writeText(addr).then(() => toast('📋 Address copied!'));
+  async function questActions(q) {
+    const b = [];
+    if (q.status === 'active') b.push(`<button class="btn btn-sm" data-act="pause" data-id="${q.id}">Pause</button>`);
+    if (q.status === 'paused') b.push(`<button class="btn btn-sm" data-act="resume" data-id="${q.id}">Resume</button>`);
+    if (q.status === 'scheduled') b.push(`<button class="btn btn-sm" data-act="resume" data-id="${q.id}">Open now</button>`);
+    if (q.status !== 'completed') b.push(`<button class="btn btn-sm btn-danger" data-act="end" data-id="${q.id}">End</button>`);
+    return b.join('');
   }
-}
+  async function handleQuestAction(act_, id, after) {
+    const q = (await api('GET', `/api/admin/quests/${id}`)).quest;
+    if (act_ === 'end' && !confirm(`End "${q.title}" now? ${q.reward.type === 'performance' ? 'Rankings will be locked and winners paid.' : 'No more posts will be accepted.'}`)) return;
+    const status = act_ === 'pause' ? 'paused' : act_ === 'resume' ? 'active' : 'completed';
+    await act(() => api('POST', `/api/admin/quests/${id}/status`, { status }), `Quest ${status === 'active' ? 'activated' : status}`);
+    after && after();
+  }
+  view.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    handleQuestAction(b.dataset.act, b.dataset.id, () => route());
+  });
 
-function esc(s) { const d=document.createElement('div'); d.textContent=(s||'').toString(); return d.innerHTML; }
+  // ── views ─────────────────────────────────────────────
+  const views = {};
+
+  views.overview = async () => {
+    const o = await api('GET', '/api/admin/overview');
+    const s = o.stats;
+    document.getElementById('c-att').textContent = o.attention.filter((a) => a.level === 'error').length || '';
+    document.getElementById('c-fail').textContent = s.rewards_failed || '';
+    const paid = s.paid_by_token.map((p) => `${amount(p.total)} ${esc(p.token)}`).join(', ') || '0';
+    const active = o.quests.filter((q) => q.status === 'active' || q.status === 'scheduled' || q.status === 'paused');
+    view.innerHTML = `
+      <div class="view-head"><div><h1 class="display">Overview</h1><div class="sub">${cfg.demo ? 'Demo data — everything here is simulated and safe to play with.' : `${esc(cfg.brand.name)} at a glance.`}</div></div>
+        <div class="actions"><a class="btn btn-primary" href="#quests/new">New quest</a></div></div>
+      ${o.attention.length ? `<div class="attention">${o.attention.map((a) => `<div class="att ${a.level}"><i></i><span>${esc(a.message)}</span>${a.quest_id ? `<a class="btn btn-sm btn-outline" href="#quests/${a.quest_id}">Open quest</a>` : a.reward_id ? `<a class="btn btn-sm btn-outline" href="#payouts">See payouts</a>` : ''}</div>`).join('')}</div>` : ''}
+      <div class="stats">
+        <div class="stat"><div class="v">${int(s.active_quests)}</div><div class="l">active quests</div></div>
+        <div class="stat"><div class="v">${int(s.verified_posts)}</div><div class="l">verified posts <span class="faint">(${int(s.rejected_posts)} rejected)</span></div></div>
+        <div class="stat"><div class="v">${int(s.participants)}</div><div class="l">creators paid or competing</div></div>
+        <div class="stat"><div class="v gold">${paid}</div><div class="l">paid out, ${int(s.rewards_paid)} payouts</div></div>
+        <div class="stat"><div class="v ${s.rewards_failed ? 'coral' : s.rewards_queued ? 'sky' : ''}">${int(s.rewards_queued + s.rewards_failed)}</div><div class="l">${s.rewards_failed ? `${s.rewards_failed} failed, ${s.rewards_queued} queued` : 'payouts in flight'}</div></div>
+      </div>
+      <div class="two">
+        <div class="panel"><div class="panel-head"><h3>Live quests</h3><a class="small" href="#quests">All quests</a></div>
+          ${active.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Quest</th><th>Posts</th><th>Pool</th><th>Window</th><th>Status</th></tr></thead><tbody>
+          ${active.map((q) => `<tr><td>${questCell(q)}</td><td>${int(q.stats.verified)}<div class="faint small">${q.reward.type === 'performance' ? 'ranked' : 'per post'}</div></td><td>${poolCell(q)}</td><td>${windowCell(q)}</td><td>${statusTag(q.status)}</td></tr>`).join('')}
+          </tbody></table></div>` : '<div class="empty"><strong>No live quests</strong><a href="#quests/new">Create one</a> to get started.</div>'}
+        </div>
+        <div class="panel"><div class="panel-head"><h3>Activity</h3><span class="small faint">latest ${o.events.length}</span></div><div class="panel-pad feed">
+          ${o.events.map((ev) => `<div class="feed-item"><div>${esc(ev.message)}<div class="k">${esc(ev.type)}</div></div><span class="t" data-ago="${esc(ev.created_at)}">${ago(ev.created_at)}</span></div>`).join('') || '<div class="empty">Nothing yet</div>'}
+        </div></div>
+      </div>`;
+  };
+
+  views.quests = async (filter = 'all') => {
+    const { quests } = await api('GET', '/api/admin/quests');
+    const list = filter === 'all' ? quests : quests.filter((q) => q.status === filter);
+    const counts = Object.fromEntries(['active', 'scheduled', 'paused', 'completed'].map((k) => [k, quests.filter((q) => q.status === k).length]));
+    view.innerHTML = `
+      <div class="view-head"><div><h1 class="display">Quests</h1><div class="sub">${int(quests.length)} quests, ${int(counts.active)} active</div></div><div class="actions"><a class="btn btn-primary" href="#quests/new">New quest</a></div></div>
+      <div class="filters"><div class="seg" id="qfilter">${['all', 'active', 'scheduled', 'paused', 'completed'].map((k) => `<button class="${k === filter ? 'active' : ''}" data-f="${k}">${k[0].toUpperCase() + k.slice(1)}${k !== 'all' && counts[k] ? ` (${counts[k]})` : ''}</button>`).join('')}</div></div>
+      <div class="panel">${list.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Quest</th><th>Type</th><th>Reward</th><th>Pool</th><th>Posts</th><th>Window</th><th>Status</th><th></th></tr></thead><tbody>
+        ${(await Promise.all(list.map(async (q) => `<tr><td>${questCell(q)}</td><td>${typeTag(q.reward.type)}</td><td><b class="gold">${amount(q.reward.amount)} ${esc(q.reward.token)}</b>${q.reward.type === 'performance' ? `<div class="small faint">× top ${q.reward.winner_count}</div>` : ''}</td><td>${poolCell(q)}</td><td>${int(q.stats.verified)} <span class="faint small">/ ${int(q.stats.rejected)}</span></td><td>${windowCell(q)}</td><td>${statusTag(q.status)}</td><td class="right"><div class="actions" style="justify-content:flex-end">${await questActions(q)}</div></td></tr>`))).join('')}
+        </tbody></table></div>` : '<div class="empty"><strong>No quests here</strong>Try another filter or <a href="#quests/new">create a quest</a>.</div>'}</div>`;
+    document.getElementById('qfilter').addEventListener('click', (e) => { const b = e.target.closest('button[data-f]'); if (b) views.quests(b.dataset.f); });
+  };
+
+  // quest form (create + edit)
+  function questForm(q) {
+    const isEdit = Boolean(q);
+    const r = q ? q.rules : {};
+    const w = q ? q.reward : {};
+    const toLocal = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
+    const chainOpts = Object.entries(chains).map(([k, c]) => `<option value="${k}" ${(w.chain || 'base') === k ? 'selected' : ''}>${esc(c.name)}${c.testnet ? ' (testnet)' : ''}</option>`).join('');
+    return `
+      <div class="view-head"><div><h1 class="display">${isEdit ? 'Edit quest' : 'New quest'}</h1><div class="sub">${isEdit ? esc(q.title) : 'Everything a creator needs to know, and everything the verifier checks.'}</div></div><div class="actions"><a class="btn btn-ghost" href="#${isEdit ? `quests/${q.id}` : 'quests'}">Cancel</a></div></div>
+      <form id="qform" class="panel" style="max-width:860px">
+        <div class="form-section"><h3>Brief</h3><div class="lead">What the quest is about and who set it.</div>
+          <div class="grid-2">
+            <div class="field" style="grid-column:1/-1"><label>Title</label><input class="input" name="title" required maxlength="120" value="${esc(q?.title || '')}" placeholder="SpaceWay IDO — launch thread"></div>
+            <div class="field"><label>KOL handle</label><input class="input" name="kol_handle" value="${esc(q?.kol_handle || '')}" placeholder="spacewaytokens"><span class="hint">Shown as "Set by @handle"</span></div>
+            <div class="field"><label>Cover emoji</label><input class="input" name="cover" maxlength="4" value="${esc(q?.cover || '')}" placeholder="🚀"></div>
+            <div class="field" style="grid-column:1/-1"><label>KOL post link (optional)</label><input class="input" name="kol_tweet_url" value="${esc(q?.kol_tweet_url || '')}" placeholder="https://x.com/spacewaytokens/status/…"><span class="hint">Creators are pointed to this post for context.</span></div>
+            <div class="field" style="grid-column:1/-1"><label>Description</label><textarea name="description" rows="3" placeholder="What should people write about?">${esc(q?.description || '')}</textarea></div>
+          </div>
+        </div>
+        <div class="form-section"><h3>Rules</h3><div class="lead">The verifier checks every one of these against the fetched post.</div>
+          <div class="grid-2">
+            <div class="field"><label>Required keywords</label><input class="input" name="required_keywords" value="${esc((r.required_keywords || []).join(', '))}" placeholder="SpaceWay, IDO, SPWAY"><span class="hint">Comma-separated. Matched as whole words, any case; #tags and $tickers count.</span></div>
+            <div class="field"><label>Keyword rule</label><select name="keyword_mode"><option value="all" ${r.keyword_mode !== 'any' ? 'selected' : ''}>Post must include every keyword</option><option value="any" ${r.keyword_mode === 'any' ? 'selected' : ''}>Post must include at least one</option></select></div>
+            <div class="field"><label>Must mention</label><input class="input" name="must_mention" value="${esc((r.must_mention || []).join(', '))}" placeholder="spacewaytokens"><span class="hint">Handles, comma-separated, without @.</span></div>
+            <div class="field"><label>Banned words</label><input class="input" name="banned_keywords" value="${esc((r.banned_keywords || []).join(', '))}" placeholder="guaranteed, risk-free"></div>
+            <div class="field"><label>Minimum characters</label><input class="input" type="number" min="0" name="min_chars" value="${r.min_chars ?? 280}"><span class="hint">0 for no minimum. Links count as 23.</span></div>
+            <div class="field"><label>Maximum characters</label><input class="input" type="number" min="0" name="max_chars" value="${r.max_chars ?? 0}"><span class="hint">0 for no limit.</span></div>
+            <div class="field" style="grid-column:1/-1"><label class="checkbox"><input type="checkbox" name="require_after_start" ${r.require_after_start !== false ? 'checked' : ''}> Only accept posts published after the quest opened</label></div>
+          </div>
+        </div>
+        <div class="form-section"><h3>Reward</h3><div class="lead">Paid from the escrow wallet. Token decimals are read from the contract.</div>
+          <div class="toggle">
+            <label><input type="radio" name="reward_type" value="fixed" ${(w.type || 'fixed') === 'fixed' ? 'checked' : ''}><span><b>Per verified post</b><small>Every verified post is paid the same amount, instantly, until the pool runs out.</small></span></label>
+            <label><input type="radio" name="reward_type" value="performance" ${w.type === 'performance' ? 'checked' : ''}><span><b>Ranked by engagement</b><small>Posts compete; the top N by weighted engagement are paid when the quest closes.</small></span></label>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label>Amount per post / winner</label><input class="input" type="number" step="any" min="0" name="reward_amount" required value="${w.amount ?? ''}" placeholder="25"></div>
+            <div class="field"><label>Token symbol</label><input class="input" name="reward_token" value="${esc(w.token || '')}" placeholder="USDC"><span class="hint">Leave empty for the chain's native coin.</span></div>
+            <div class="field"><label>Chain</label><select name="reward_chain">${chainOpts}</select></div>
+            <div class="field" style="grid-column:1/-1"><label>Token contract (ERC-20)</label><input class="input mono" name="reward_token_address" value="${esc(w.token_address || '')}" placeholder="0x… (empty = native coin)"></div>
+            <div class="field"><label>Total pool</label><input class="input" type="number" step="any" min="0" name="total_reward_pool" required value="${w.total_pool ?? ''}" placeholder="2500"><span class="hint">${isEdit ? 'Raising it adds to the remaining pool.' : 'Must cover at least one payout.'}</span></div>
+            <div class="field perf-only"><label>Number of winners</label><input class="input" type="number" min="1" name="winner_count" value="${w.winner_count || 10}"></div>
+            <div class="field fixed-only"><label>Max verified posts</label><input class="input" type="number" min="0" name="max_submissions" value="${q?.limits?.max_submissions ?? 0}"><span class="hint">0 for unlimited (the pool still caps it).</span></div>
+            <div class="field"><label>Posts per wallet</label><input class="input" type="number" min="1" name="max_per_wallet" value="${q?.limits?.max_per_wallet ?? 1}"></div>
+            <div class="field" style="grid-column:1/-1"><label>RPC URL override (optional)</label><input class="input mono" name="rpc_url" value="${esc(q?.rpc_url || '')}" placeholder="https://…"><span class="hint">Defaults to a public RPC for the chain, or ESCROW_RPC_URL.</span></div>
+          </div>
+          <div class="perf-only">
+            <div class="label" style="margin-bottom:8px">Engagement weights</div>
+            <div class="grid-3" style="grid-template-columns:repeat(5,minmax(0,1fr))">
+              ${[['likes', 1], ['retweets', 2], ['replies', 1.5], ['quotes', 3], ['views', 0.01]].map(([k, d]) => `<div class="field"><label>${k === 'retweets' ? 'Reposts' : k[0].toUpperCase() + k.slice(1)}</label><input class="input" type="number" step="any" min="0" name="weight_${k}" value="${(w.weights && w.weights[k]) ?? d}"></div>`).join('')}
+            </div>
+            <label class="checkbox"><input type="checkbox" name="auto_distribute" ${q ? (q.auto_distribute ? 'checked' : '') : 'checked'}> Pay winners automatically when the quest closes</label>
+          </div>
+        </div>
+        <div class="form-section"><h3>Window</h3><div class="lead">Leave start empty to open immediately. The quest closes itself at the end time.</div>
+          <div class="grid-2">
+            <div class="field"><label>Opens</label><input class="input" type="datetime-local" name="starts_at" value="${toLocal(q?.starts_at)}"></div>
+            <div class="field"><label>Closes</label><input class="input" type="datetime-local" name="ends_at" value="${toLocal(q?.ends_at)}"></div>
+          </div>
+        </div>
+        <div class="form-foot"><span class="coral small hidden" id="qform-err" style="align-self:center;margin-right:auto"></span><a class="btn btn-ghost" href="#${isEdit ? `quests/${q.id}` : 'quests'}">Cancel</a><button class="btn btn-primary" type="submit">${isEdit ? 'Save changes' : 'Create quest'}</button></div>
+      </form>`;
+  }
+  function wireQuestForm(q) {
+    const form = document.getElementById('qform');
+    const sync = () => {
+      const perf = form.reward_type.value === 'performance';
+      form.querySelectorAll('.perf-only').forEach((el) => el.classList.toggle('hidden', !perf));
+      form.querySelectorAll('.fixed-only').forEach((el) => el.classList.toggle('hidden', perf));
+    };
+    form.addEventListener('change', (e) => { if (e.target.name === 'reward_type') sync(); });
+    sync();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const body = Object.fromEntries(fd.entries());
+      body.require_after_start = fd.has('require_after_start');
+      body.auto_distribute = fd.has('auto_distribute');
+      for (const k of ['starts_at', 'ends_at']) body[k] = body[k] ? new Date(body[k]).toISOString() : null;
+      const err = document.getElementById('qform-err');
+      err.classList.add('hidden');
+      try {
+        const out = q ? await api('PATCH', `/api/admin/quests/${q.id}`, body) : await api('POST', '/api/admin/quests', body);
+        QB.toast(q ? 'Changes saved' : 'Quest created', 'ok');
+        location.hash = `#quests/${out.quest.id}`;
+      } catch (ex) { err.textContent = ex.message; err.classList.remove('hidden'); err.scrollIntoView({ block: 'center' }); }
+    });
+  }
+  views.questNew = async () => { view.innerHTML = questForm(null); wireQuestForm(null); };
+  views.questEdit = async (id) => { const { quest } = await api('GET', `/api/admin/quests/${id}`); view.innerHTML = questForm(quest); wireQuestForm(quest); };
+
+  views.questDetail = async (id, tab = 'submissions') => {
+    const d = await api('GET', `/api/admin/quests/${id}`);
+    const q = d.quest;
+    const perf = q.reward.type === 'performance';
+    const subs = d.submissions;
+    const verified = subs.filter((s) => s.status === 'verified');
+    const tabs = perf ? ['submissions', 'leaderboard'] : ['submissions'];
+    view.innerHTML = `
+      <div class="view-head"><div><a class="small muted" href="#quests">Quests</a><h1 class="display" style="margin-top:4px">${esc(q.cover || '')} ${esc(q.title)}</h1><div class="sub">${statusTag(q.status)} ${typeTag(q.reward.type)} <span style="margin-left:8px">Set by @${esc(q.kol_handle || '—')}. ${q.ends_at ? (q.status === 'completed' ? `Ended ${QB.date(q.ends_at)}.` : `Closes ${QB.date(q.ends_at)} (${until(q.ends_at)}).`) : 'No end date.'}</span></div></div>
+        <div class="actions">
+          <a class="btn btn-outline" href="/quest/${q.id}" target="_blank" rel="noopener">View public page</a>
+          ${q.status !== 'completed' ? `<a class="btn" href="#quests/${q.id}/edit">Edit</a>` : ''}
+          <button class="btn" id="btn-fund">Add to pool</button>
+          ${perf && q.status !== 'completed' ? `<button class="btn" id="btn-refresh">Refresh engagement</button>` : ''}
+          ${perf && q.status === 'completed' && !q.distributed_at ? `<button class="btn btn-mint" id="btn-distribute">Pay winners</button>` : ''}
+          ${await questActions(q)}
+        </div></div>
+      <div class="stats">
+        <div class="stat"><div class="v gold">${amount(q.reward.amount)} ${esc(q.reward.token)}</div><div class="l">${perf ? `each, top ${q.reward.winner_count}` : 'per verified post'} on ${esc(q.reward.chain_name)}</div></div>
+        <div class="stat"><div class="v">${amount(q.reward.remaining_pool)} <span class="faint" style="font-size:14px">/ ${amount(q.reward.total_pool)}</span></div><div class="l">${esc(q.reward.token)} left in pool</div></div>
+        <div class="stat"><div class="v">${int(q.stats.verified)}</div><div class="l">verified posts${q.limits.max_submissions ? ` of ${int(q.limits.max_submissions)} slots` : ''}</div></div>
+        <div class="stat"><div class="v">${int(q.stats.rejected)}</div><div class="l">rejected</div></div>
+        <div class="stat"><div class="v gold">${amount(q.stats.paid_out)}</div><div class="l">${esc(q.reward.token)} paid out</div></div>
+      </div>
+      ${perf ? `<div class="filters"><div class="seg" id="qtabs">${tabs.map((t) => `<button class="${t === tab ? 'active' : ''}" data-t="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div>${q.engagement_refreshed_at ? `<span class="small faint">Engagement refreshed ${ago(q.engagement_refreshed_at)}${q.finalized_at ? ', rankings locked' : ''}</span>` : ''}</div>` : ''}
+      <div class="panel" id="qpanel"></div>`;
+
+    const panel = document.getElementById('qpanel');
+    if (tab === 'leaderboard') {
+      panel.innerHTML = d.leaderboard.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>Creator</th><th class="right">Score</th><th class="right">Likes</th><th class="right">Reposts</th><th class="right">Replies</th><th class="right">Quotes</th><th class="right">Views</th><th>Payout</th></tr></thead><tbody>
+        ${d.leaderboard.map((r) => `<tr><td><span class="pos ${r.position <= q.reward.winner_count ? 'w' : ''}" style="display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font-weight:700;font-size:12px;background:${r.position <= q.reward.winner_count ? 'var(--gold)' : 'var(--ink-700)'};color:${r.position <= q.reward.winner_count ? 'var(--gold-ink)' : 'var(--text-2)'}">${r.position}</span></td><td><a href="${esc(r.tweet_url)}" target="_blank" rel="noopener">@${esc(r.x_handle)}</a><div class="small faint mono">${esc(r.wallet)}</div></td><td class="right"><b>${QB.compact(r.engagement.score)}</b></td><td class="right">${int(r.engagement.likes)}</td><td class="right">${int(r.engagement.retweets)}</td><td class="right">${int(r.engagement.replies)}</td><td class="right">${int(r.engagement.quotes)}</td><td class="right">${int(r.engagement.views)}</td><td>${r.winner ? rewardTag(r.reward || { status: 'queued' }) : r.position <= q.reward.winner_count ? '<span class="small faint">Leading</span>' : ''}</td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty"><strong>No verified posts yet</strong></div>';
+    } else {
+      panel.innerHTML = subs.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Creator</th><th>Post</th><th>Result</th>${perf ? '<th class="right">Score</th>' : ''}<th>Payout</th><th>When</th></tr></thead><tbody>
+        ${subs.map((s) => `<tr data-sub="${s.id}" style="cursor:pointer"><td><b>@${esc(s.x_handle)}</b><div class="small faint mono">${mask(s.wallet)}</div></td><td><div class="excerpt">${esc(s.tweet_text)}</div></td><td>${s.status === 'verified' ? '<span class="tag tag-verified">Verified</span>' : '<span class="tag tag-rejected">Rejected</span>'}${checksInline(s)}</td>${perf ? `<td class="right">${s.status === 'verified' ? `<b>${QB.compact(s.engagement.score)}</b><div class="small faint">#${s.rank || '—'}</div>` : ''}</td>` : ''}<td>${rewardTag(s.reward)}${s.reward && s.reward.tx_hash && !s.reward.simulated ? `<div class="small"><a href="${esc(s.reward.explorer_url)}" target="_blank" rel="noopener">${esc(s.reward.tx_hash.slice(0, 10))}…</a></div>` : ''}</td><td class="small muted" data-ago="${esc(s.created_at)}">${ago(s.created_at)}</td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty"><strong>No submissions yet</strong>Share the public page to get the first post in.</div>';
+      panel.querySelectorAll('tr[data-sub]').forEach((tr) => tr.addEventListener('click', () => openSubmission(subs.find((s) => s.id === Number(tr.dataset.sub)))));
+    }
+    document.getElementById('qtabs')?.addEventListener('click', (e) => { const b = e.target.closest('button[data-t]'); if (b) views.questDetail(id, b.dataset.t); });
+    document.getElementById('btn-fund')?.addEventListener('click', async () => {
+      const v = prompt(`Add how much ${q.reward.token} to the pool? (Send the tokens to the escrow wallet first.)`);
+      if (!v) return;
+      await act(() => api('POST', `/api/admin/quests/${q.id}/fund`, { amount: Number(v) }), `Pool increased by ${v} ${q.reward.token}`);
+      views.questDetail(id, tab);
+    });
+    document.getElementById('btn-refresh')?.addEventListener('click', async (e) => {
+      e.target.disabled = true; e.target.innerHTML = '<span class="spin"></span> Refreshing…';
+      try { const r = await act(() => api('POST', `/api/admin/quests/${q.id}/refresh-engagement`), undefined); QB.toast(r.provider_has_metrics ? `Updated ${r.updated} posts` : 'This post provider has no engagement metrics — rankings keep their last scores', r.provider_has_metrics ? 'ok' : 'err'); } catch {}
+      views.questDetail(id, 'leaderboard');
+    });
+    document.getElementById('btn-distribute')?.addEventListener('click', async () => {
+      if (!confirm(`Queue payouts of ${q.reward.amount} ${q.reward.token} to the top ${q.reward.winner_count}?`)) return;
+      const r = await act(() => api('POST', `/api/admin/quests/${q.id}/distribute`), undefined);
+      QB.toast(`${r.queued} payouts queued`, 'ok');
+      views.questDetail(id, 'leaderboard');
+    });
+  };
+
+  function openSubmission(s) {
+    const host = document.getElementById('drawer-host');
+    host.innerHTML = `<div class="drawer-back"><div class="drawer">
+      <div class="row" style="justify-content:space-between"><h2>@${esc(s.x_handle)} on "${esc(s.quest_title)}"</h2><button class="btn btn-ghost btn-sm" id="drawer-close">Close</button></div>
+      <div class="row small muted" style="gap:14px">${s.status === 'verified' ? '<span class="tag tag-verified">Verified</span>' : '<span class="tag tag-rejected">Rejected</span>'}<span>Submitted ${QB.date(s.created_at)}</span><span>via ${esc(s.provider)}</span><a href="${esc(s.tweet_url)}" target="_blank" rel="noopener">Open post on X</a></div>
+      <div class="post-full">${esc(s.tweet_text)}</div>
+      <h3 style="margin-top:18px">Checks</h3>
+      <ul class="check-list">${s.checks.map((c) => `<li class="${c.ok ? '' : 'bad'}"><span>${c.ok ? '✓' : '✕'}</span><span><b>${esc(c.label)}</b> — ${esc(c.detail || '')}</span></li>`).join('')}</ul>
+      <h3 style="margin-top:18px">Details</h3>
+      <dl class="kv" style="margin-top:8px">
+        <dt>Wallet</dt><dd class="mono">${esc(s.wallet)}</dd>
+        <dt>Author</dt><dd>@${esc(s.tweet_author || '—')} ${s.tweet_author_id ? `<span class="faint">(${esc(s.tweet_author_id)})</span>` : ''}</dd>
+        <dt>Post id</dt><dd class="mono">${esc(s.tweet_id)}</dd>
+        <dt>Posted</dt><dd>${s.tweet_created_at ? QB.date(s.tweet_created_at) : '—'}</dd>
+        <dt>Length</dt><dd>${int(s.tweet_chars)} characters</dd>
+        <dt>Engagement</dt><dd>${int(s.engagement.likes)} likes, ${int(s.engagement.retweets)} reposts, ${int(s.engagement.replies)} replies, ${int(s.engagement.quotes)} quotes, ${int(s.engagement.views)} views${s.engagement.updated_at ? ` <span class="faint">(${ago(s.engagement.updated_at)})</span>` : ''}</dd>
+        <dt>Payout</dt><dd>${s.reward ? `${rewardTag(s.reward)} ${amount(s.reward.amount)} ${esc(s.reward.token)} ${s.reward.tx_hash ? `<span class="mono small">${esc(s.reward.tx_hash)}</span>` : ''}${s.reward.error ? `<div class="coral small">${esc(s.reward.error)}</div>` : ''}${s.reward.status === 'failed' ? `<button class="btn btn-sm" id="drawer-retry" data-id="${s.reward.id}" style="margin-top:6px">Retry payout</button>` : ''}` : '—'}</dd>
+      </dl>
+    </div></div>`;
+    const close = () => { host.innerHTML = ''; };
+    host.querySelector('.drawer-back').addEventListener('click', (e) => { if (e.target.classList.contains('drawer-back')) close(); });
+    host.querySelector('#drawer-close').addEventListener('click', close);
+    host.querySelector('#drawer-retry')?.addEventListener('click', async (e) => { await act(() => api('POST', `/api/admin/rewards/${e.target.dataset.id}/retry`), 'Payout re-queued'); close(); route(); });
+  }
+
+  views.submissions = async () => {
+    const state = views.submissions.state || (views.submissions.state = { status: '', quest_id: '', q: '' });
+    const [{ submissions }, { quests }] = await Promise.all([
+      api('GET', `/api/admin/submissions?status=${state.status}&quest_id=${state.quest_id}&q=${encodeURIComponent(state.q)}`), api('GET', '/api/admin/quests'),
+    ]);
+    view.innerHTML = `
+      <div class="view-head"><div><h1 class="display">Submissions</h1><div class="sub">Every post that came through the verifier.</div></div></div>
+      <div class="filters">
+        <div class="seg" id="sfilter">${[['', 'All'], ['verified', 'Verified'], ['rejected', 'Rejected']].map(([k, l]) => `<button class="${state.status === k ? 'active' : ''}" data-f="${k}">${l}</button>`).join('')}</div>
+        <select id="squest"><option value="">All quests</option>${quests.map((q) => `<option value="${q.id}" ${String(q.id) === String(state.quest_id) ? 'selected' : ''}>${esc(q.title)}</option>`).join('')}</select>
+        <input class="input" id="ssearch" placeholder="Search handle, wallet or text" value="${esc(state.q)}">
+      </div>
+      <div class="panel">${submissions.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Creator</th><th>Quest</th><th>Post</th><th>Result</th><th>Payout</th><th>When</th></tr></thead><tbody>
+        ${submissions.map((s) => `<tr data-sub="${s.id}" style="cursor:pointer"><td><b>@${esc(s.x_handle)}</b><div class="small faint mono">${mask(s.wallet)}</div></td><td><a href="#quests/${s.quest_id}">${esc(s.quest_title)}</a></td><td><div class="excerpt">${esc(s.tweet_text)}</div></td><td>${s.status === 'verified' ? '<span class="tag tag-verified">Verified</span>' : '<span class="tag tag-rejected">Rejected</span>'}${checksInline(s)}</td><td>${rewardTag(s.reward)}</td><td class="small muted" data-ago="${esc(s.created_at)}">${ago(s.created_at)}</td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty"><strong>No submissions match</strong></div>'}</div>`;
+    document.getElementById('sfilter').addEventListener('click', (e) => { const b = e.target.closest('button[data-f]'); if (b) { state.status = b.dataset.f; views.submissions(); } });
+    document.getElementById('squest').addEventListener('change', (e) => { state.quest_id = e.target.value; views.submissions(); });
+    let t; document.getElementById('ssearch').addEventListener('input', (e) => { clearTimeout(t); t = setTimeout(() => { state.q = e.target.value; views.submissions().then(() => { const i = document.getElementById('ssearch'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }); }, 350); });
+    view.querySelectorAll('tr[data-sub]').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('a')) return; openSubmission(submissions.find((s) => s.id === Number(tr.dataset.sub))); }));
+  };
+
+  views.payouts = async (filter = '') => {
+    const { rewards } = await api('GET', `/api/admin/rewards?status=${filter}`);
+    const failed = rewards.filter((r) => r.raw_status === 'failed').length;
+    view.innerHTML = `
+      <div class="view-head"><div><h1 class="display">Payouts</h1><div class="sub">Every reward queued from escrow${cfg.features.escrow ? '' : cfg.demo ? ' (simulated in demo mode)' : ' — escrow wallet not configured, payouts wait in the queue'}.</div></div>
+        <div class="actions"><button class="btn" id="run-queue">Run queue now</button></div></div>
+      <div class="filters"><div class="seg" id="pfilter">${[['', 'All'], ['queued', 'Queued'], ['sent', 'Sent'], ['simulated', 'Simulated'], ['failed', `Failed${failed ? ` (${failed})` : ''}`]].map(([k, l]) => `<button class="${filter === k ? 'active' : ''}" data-f="${k}">${l}</button>`).join('')}</div></div>
+      <div class="panel">${rewards.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Created</th><th>Quest</th><th>Recipient</th><th class="right">Amount</th><th>Status</th><th>Transaction</th><th></th></tr></thead><tbody>
+        ${rewards.map((r) => `<tr><td class="small muted" data-ago="${esc(r.created_at)}">${ago(r.created_at)}</td><td><a href="#quests/${r.quest_id}">${esc(r.quest_title)}</a></td><td><b>@${esc(r.x_handle)}</b><div class="small faint mono">${mask(r.wallet)}</div></td><td class="right"><b class="gold">${amount(r.amount)} ${esc(r.token)}</b><div class="small faint">${esc(r.chain_name)}</div></td><td>${rewardTag(r)}${r.error ? `<div class="small coral" style="max-width:260px">${esc(r.error)}</div>` : ''}${r.raw_status === 'queued' && r.attempts ? `<div class="small faint">attempt ${r.attempts}</div>` : ''}</td><td>${r.tx_hash ? (r.explorer_url ? `<a class="mono small" href="${esc(r.explorer_url)}" target="_blank" rel="noopener">${esc(r.tx_hash.slice(0, 14))}…</a>` : `<span class="mono small faint">${esc(r.tx_hash.slice(0, 14))}… (simulated)</span>`) : '<span class="faint">—</span>'}</td><td class="right">${r.raw_status === 'failed' ? `<button class="btn btn-sm" data-retry="${r.id}">Retry</button>` : ''}</td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty"><strong>No payouts yet</strong></div>'}</div>`;
+    document.getElementById('pfilter').addEventListener('click', (e) => { const b = e.target.closest('button[data-f]'); if (b) views.payouts(b.dataset.f); });
+    document.getElementById('run-queue').addEventListener('click', async (e) => { e.target.disabled = true; const r = await act(() => api('POST', '/api/admin/rewards/process'), undefined); QB.toast(r.sent ? `${r.sent} payouts sent` : 'Queue is empty or waiting on retries', 'ok'); views.payouts(filter); });
+    view.querySelectorAll('button[data-retry]').forEach((b) => b.addEventListener('click', async () => { await act(() => api('POST', `/api/admin/rewards/${b.dataset.retry}/retry`), 'Payout re-queued'); views.payouts(filter); }));
+  };
+
+  views.treasury = async () => {
+    view.innerHTML = '<div class="view-head"><h1 class="display">Treasury</h1></div><div class="skeleton" style="height:120px"></div>';
+    const t = await api('GET', '/api/admin/treasury');
+    view.innerHTML = `
+      <div class="view-head"><div><h1 class="display">Treasury</h1><div class="sub">The escrow wallet pays every reward. Keep each balance above what's committed.</div></div></div>
+      <div class="panel" style="margin-bottom:18px"><div class="panel-pad">
+        ${t.configured ? `<div class="label">Escrow wallet</div><div class="addr" style="margin-top:6px"><code style="font-size:15px">${esc(t.address)}</code><button class="btn btn-ghost btn-sm" id="copy-addr">Copy</button>${t.explorer_url ? `<a class="btn btn-ghost btn-sm" href="${esc(t.explorer_url)}" target="_blank" rel="noopener">Explorer</a>` : ''}</div><p class="small muted" style="margin:10px 0 0">Send reward tokens to this address, then raise the quest's pool from its page. Native coin is also needed for gas on every chain you pay on.</p>`
+        : `<strong>${cfg.demo ? 'Demo mode: payouts are simulated.' : 'No escrow wallet configured.'}</strong><p class="small muted" style="margin:6px 0 0">Set <code>ESCROW_PRIVATE_KEY</code> (and optionally <code>ESCROW_RPC_URL</code>) in <code>.env</code> and restart. Until then every payout waits in the queue${cfg.demo ? ', or is marked as simulated in demo mode' : ''}.</p>`}
+      </div></div>
+      <div class="two">
+        <div class="panel"><div class="panel-head"><h3>Balances vs. commitments</h3></div>
+          ${t.balances.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Chain</th><th>Token</th><th class="right">Balance</th><th class="right">Committed</th><th class="right">Shortfall</th></tr></thead><tbody>
+          ${t.balances.map((b) => `<tr class="balance-row ${b.shortfall > 0 ? 'short' : ''}"><td>${esc(b.chain_name)}${b.testnet ? ' <span class="faint small">testnet</span>' : ''}</td><td>${esc(b.token)}${b.token_address ? `<div class="small faint mono">${esc(b.token_address.slice(0, 10))}…</div>` : ''}</td><td class="right">${b.balance === null ? `<span class="coral small" title="${esc(b.error || '')}">RPC error</span>` : `<b>${amount(b.balance)}</b>`}</td><td class="right">${amount(b.committed)}</td><td class="right">${b.shortfall === null ? '—' : b.shortfall > 0 ? `<b class="coral">${amount(b.shortfall)}</b>` : '<span class="mint">covered</span>'}</td></tr>`).join('')}
+          </tbody></table></div>` : `<div class="empty">${t.configured ? 'No quests yet, so nothing to compare.' : 'Configure the escrow wallet to see live balances.'}${t.liabilities.length ? `<div style="margin-top:10px">Committed: ${t.liabilities.map((l) => `${amount(l.open_pool)} ${esc(l.token)} on ${esc(l.chain)}`).join(', ')}</div>` : ''}</div>`}
+        </div>
+        <div class="panel"><div class="panel-head"><h3>Pools by quest</h3></div>
+          <div class="table-wrap"><table class="data"><thead><tr><th>Quest</th><th>Status</th><th class="right">Left</th><th class="right">Paid</th></tr></thead><tbody>
+          ${t.quests.map((q) => `<tr><td><a href="#quests/${q.id}">${esc(q.title)}</a><div class="small faint">${esc(q.token)} on ${esc(q.chain)}</div></td><td>${statusTag(q.status)}</td><td class="right">${amount(q.remaining_pool)} <span class="faint small">/ ${amount(q.total_pool)}</span></td><td class="right gold">${amount(q.paid_out)}</td></tr>`).join('')}
+          </tbody></table></div>
+        </div>
+      </div>`;
+    document.getElementById('copy-addr')?.addEventListener('click', async () => { await navigator.clipboard.writeText(t.address); QB.toast('Address copied', 'ok'); });
+  };
+
+  views.system = async () => {
+    const s = await api('GET', '/api/admin/system');
+    const ok = (v) => (v ? '<span class="mint">configured</span>' : '<span class="coral">not configured</span>');
+    view.innerHTML = `
+      <div class="view-head"><div><h1 class="display">System</h1><div class="sub">What this server is connected to.</div></div></div>
+      <div class="two">
+        <div class="panel"><div class="panel-head"><h3>Configuration</h3></div><div class="panel-pad"><dl class="kv">
+          <dt>Mode</dt><dd>${s.mode === 'demo' ? '<span class="gold">Demo</span> — posts and payouts simulated' : 'Production'}</dd>
+          <dt>Base URL</dt><dd class="mono">${esc(s.base_url)}</dd>
+          <dt>Post lookup</dt><dd>${esc(s.provider.label)}${s.provider.metrics ? '' : ' <span class="faint">(no engagement metrics — ranked quests need the X API)</span>'}${s.provider.error ? `<div class="coral small">${esc(s.provider.error)}</div>` : ''}</dd>
+          <dt>X sign-in</dt><dd>${ok(s.x_oauth.configured)}<div class="small faint">Callback: <span class="mono">${esc(s.x_oauth.callback_url)}</span></div><div class="small faint">API base: <span class="mono">${esc(s.x_oauth.api_base)}</span></div></dd>
+          <dt>Escrow</dt><dd>${ok(s.escrow.configured)}${s.escrow.address ? `<div class="mono small">${esc(s.escrow.address)}</div>` : ''}<div class="small faint">Default chain ${esc(s.escrow.default_chain)}, ${s.escrow.confirmations} confirmation${s.escrow.confirmations === 1 ? '' : 's'}</div></dd>
+          <dt>Scheduler</dt><dd>${s.scheduler.enabled ? `Every ${s.scheduler.tick_ms / 1000}s, ${s.scheduler.ticks} ticks${s.scheduler.last_tick ? `, last ${ago(s.scheduler.last_tick)}` : ''}` : '<span class="coral">disabled</span>'}<div class="small faint">Engagement refresh every ${s.scheduler.engagement_refresh_minutes} min${s.scheduler.last_error ? `, last error: ${esc(s.scheduler.last_error)}` : ''}</div></dd>
+          <dt>Sessions</dt><dd>${s.session_secret_generated ? '<span class="warn">SESSION_SECRET not set</span> — sessions reset on restart' : 'Secret set'}</dd>
+          <dt>Database</dt><dd class="mono small">${esc(s.db_path)}</dd>
+          <dt>Runtime</dt><dd>Node ${esc(s.node)}, up ${Math.round(s.uptime_s / 60)} min</dd>
+        </dl></div></div>
+        <div class="panel"><div class="panel-head"><h3>Try a post lookup</h3></div><div class="panel-pad">
+          <p class="small muted">Fetch a post through the active provider to confirm credentials work.</p>
+          <form id="lookup"><div class="field"><label>Post URL</label><input class="input" name="tweet_url" placeholder="https://x.com/user/status/…" required></div>
+          ${s.mode === 'demo' ? '<div class="field"><label>Post text (demo)</label><textarea name="post_text" rows="3" placeholder="Demo mode has no X access — paste text to simulate the fetch"></textarea></div>' : ''}
+          <button class="btn" type="submit">Fetch post</button></form>
+          <pre id="lookup-out" class="post-full hidden" style="font-family:var(--mono);font-size:12.5px"></pre>
+        </div></div>
+      </div>`;
+    document.getElementById('lookup').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const out = document.getElementById('lookup-out');
+      out.classList.remove('hidden'); out.textContent = 'Fetching…';
+      try { const r = await api('POST', '/api/admin/test-lookup', Object.fromEntries(new FormData(e.target).entries())); out.textContent = JSON.stringify(r.tweet, null, 2); }
+      catch (ex) { out.textContent = `Error: ${ex.message}`; }
+    });
+  };
+
+  // ── router ────────────────────────────────────────────
+  async function route() {
+    document.getElementById('drawer-host').innerHTML = '';
+    const h = (location.hash || '#overview').slice(1);
+    const [root, a, b] = h.split('/');
+    document.querySelectorAll('.rail a.item').forEach((el) => el.classList.toggle('active', el.getAttribute('href') === `#${root}`));
+    try {
+      if (root === 'quests' && a === 'new') await views.questNew();
+      else if (root === 'quests' && a && b === 'edit') await views.questEdit(a);
+      else if (root === 'quests' && a) await views.questDetail(a);
+      else if (views[root]) await views[root]();
+      else await views.overview();
+    } catch (e) {
+      view.innerHTML = `<div class="empty"><strong>Could not load this view</strong>${esc(e.message)}</div>`;
+      if (e.status === 401) location.reload();
+    }
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})().catch((e) => { console.error(e); QB.toast(e.message, 'err'); });
 </script>
 </body>
 </html>

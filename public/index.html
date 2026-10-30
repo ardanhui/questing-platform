@@ -2,72 +2,211 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Questing Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Questboard — quests that pay on-chain</title>
+<meta name="description" content="Post about projects, get paid from escrow when the post verifies.">
+<link rel="stylesheet" href="/app.css">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
-  .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-  h1 { font-size: 2rem; margin-bottom: 8px; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .subtitle { color: #888; margin-bottom: 32px; }
-  .quest-card { background: #14141f; border: 1px solid #222; border-radius: 12px; padding: 24px; margin-bottom: 16px; transition: border-color .2s; }
-  .quest-card:hover { border-color: #6366f1; }
-  .quest-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
-  .quest-kol { color: #888; font-size: .85rem; margin-bottom: 8px; }
-  .quest-desc { color: #aaa; font-size: .9rem; margin-bottom: 12px; line-height: 1.5; }
-  .quest-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: #777; margin-bottom: 16px; }
-  .quest-meta span { background: #1a1a2e; padding: 4px 10px; border-radius: 6px; }
-  .reward-badge { background: linear-gradient(135deg, #22c55e20, #10b98120); color: #22c55e; padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: .85rem; display: inline-block; }
-  .quest-btn { display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .9rem; margin-top: 12px; }
-  .quest-btn:hover { opacity: .9; }
-  .stats-bar { display: flex; gap: 8px; flex-wrap: wrap; }
-  .empty { text-align: center; padding: 60px 20px; color: #666; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: .75rem; }
-  .pill-active { background: #22c55e20; color: #22c55e; }
-  .pill-paused { background: #f59e0b20; color: #f59e0b; }
+  .hero { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 40px; padding: 56px 0 40px; align-items: start; }
+  .hero h1 { font-size: clamp(28px, 4.2vw, 46px); max-width: 20ch; }
+  .hero p { max-width: 52ch; font-size: 16px; margin-top: 18px; }
+  .escrow { background: var(--ink-800); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; }
+  .escrow-title { font-size: 13px; color: var(--text-2); font-weight: 600; margin-bottom: 8px; }
+  .escrow-amounts { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; }
+  .escrow-amounts .amount { font-size: 30px; }
+  .escrow-sub { color: var(--text-3); font-size: 13px; margin-top: 8px; }
+  .live { margin-top: 14px; }
+  .live-title { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); font-weight: 600; margin-bottom: 8px; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 0 rgba(69,214,154,.5); animation: pulse 2.2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(69,214,154,.45); } 70% { box-shadow: 0 0 0 7px rgba(69,214,154,0); } 100% { box-shadow: 0 0 0 0 rgba(69,214,154,0); } }
+  .live-list { display: flex; flex-direction: column; }
+  .live-item { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; padding: 7px 0; border-top: 1px solid var(--line); }
+  .live-item span:last-child { color: var(--text-3); white-space: nowrap; }
+
+  .board-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 16px 0 6px; }
+  .tabs { display: flex; gap: 4px; background: var(--ink-800); border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+  .tabs button { background: transparent; border: 0; color: var(--text-2); padding: 7px 14px; border-radius: 7px; font-weight: 600; font-size: 14px; cursor: pointer; }
+  .tabs button:hover { color: var(--text); }
+  .tabs button.active { background: var(--ink-600); color: var(--text); }
+  .tabs button b { color: var(--text-3); font-weight: 600; margin-left: 6px; }
+  .tabs button.active b { color: var(--gold); }
+
+  .quest { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-areas: "cover top reward" "cover by reward" "cover rules reward"; gap: 4px 20px; padding: 20px 0; border-bottom: 1px solid var(--line); align-items: start; position: relative; }
+  .quest:hover .quest-title { color: var(--gold); }
+  .quest-cover { grid-area: cover; width: 52px; height: 52px; border-radius: 12px; background: var(--ink-700); border: 1px solid var(--line); display: grid; place-items: center; font-size: 26px; }
+  .quest-top { grid-area: top; } .quest-by { grid-area: by; } .quest-body { grid-area: rules; } .quest-reward { grid-area: reward; }
+  .quest-title { font-size: 19px; font-weight: 700; color: var(--text); transition: color var(--speed); }
+  .quest-title::after { content: ''; position: absolute; inset: 0; }
+  .quest-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .quest-by { color: var(--text-2); font-size: 14px; margin-top: 2px; }
+  .quest-by b { color: var(--text); font-weight: 600; }
+  .quest-rules { margin-top: 8px; font-size: 13.5px; color: var(--text-2); line-height: 2; }
+  .quest-rules .chip { margin-right: 2px; vertical-align: baseline; }
+  .quest-rules b { color: var(--text); font-weight: 600; }
+  .quest-meter { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-size: 13px; color: var(--text-3); max-width: 460px; }
+  .quest-meter .progress { flex: 1; }
+  .quest-reward { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 150px; }
+  .quest-reward .amount { font-size: 26px; line-height: 1; }
+  .quest-reward .per { font-size: 13px; color: var(--text-2); }
+  .quest-reward .when { font-size: 13px; color: var(--text-3); margin-top: 6px; }
+  .quest-reward .when b { color: var(--text); font-weight: 600; }
+  @media (max-width: 860px) { .hero { grid-template-columns: 1fr; gap: 24px; padding-top: 36px; } }
+  @media (max-width: 640px) {
+    .quest { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: "cover top" "cover by" "rules rules" "reward reward"; gap: 4px 14px; }
+    .quest-cover { width: 44px; height: 44px; font-size: 22px; }
+    .quest-reward { flex-direction: row; align-items: baseline; justify-content: space-between; text-align: left; margin-top: 10px; min-width: 0; }
+    .quest-reward .when { margin: 0; }
+  }
+  footer { padding: 48px 0 32px; color: var(--text-3); font-size: 13px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>🎯 Questing Platform</h1>
-  <p class="subtitle">Complete quests, earn rewards. Powered by X verification.</p>
-  <div id="quests"></div>
-  <div id="empty" class="empty" style="display:none;">No active quests right now. Check back soon!</div>
-</div>
+<header id="topbar"></header>
 
-<script>
-async function loadQuests() {
-  try {
-    const res = await fetch('/api/quests');
-    const quests = await res.json();
-    const el = document.getElementById('quests');
-    if (!quests.length) { document.getElementById('empty').style.display = 'block'; return; }
-
-    el.innerHTML = quests.map(q => `
-      <div class="quest-card">
-        <div class="quest-title">${esc(q.title)}</div>
-        <div class="quest-kol">by @${esc(q.kol_handle || 'unknown')}</div>
-        <div class="quest-desc">${esc(q.description || 'No description')}</div>
-        <div class="quest-meta">
-          <span>📝 Min ${q.min_chars} chars</span>
-          <span>🔑 Keywords: ${esc(JSON.parse(q.required_keywords).join(', '))}</span>
-          <span>✅ ${q.verified_count} completed</span>
-          ${q.max_submissions > 0 ? `<span>📊 ${q.verified_count}/${q.max_submissions}</span>` : ''}
-          <span style="background:#a855f720;color:#a855f7;padding:2px 6px;border-radius:4px;font-size:.7rem">${q.reward_type === 'performance' ? '🏆 Performance' : '🎯 Fixed'}</span>
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <h1 class="display" id="hero-title">Post about the projects you believe in. Get paid on-chain when it checks out.</h1>
+      <p class="muted">Every quest spells out the words, the length and the window. Link your X account, paste the link to your post, and the reward leaves escrow the moment it verifies — no forms, no waiting on a spreadsheet.</p>
+    </div>
+    <aside>
+      <div class="escrow" id="escrow">
+        <div class="escrow-title">Open in escrow right now</div>
+        <div class="escrow-amounts" id="escrow-amounts"><span class="skeleton" style="width:160px;height:30px"></span></div>
+        <div class="escrow-sub" id="escrow-sub"></div>
+        <div class="live">
+          <div class="live-title"><span class="live-dot"></span>Latest payouts</div>
+          <div class="live-list" id="live"></div>
         </div>
-        <div class="stats-bar">
-          <span class="reward-badge">💰 ${q.reward_amount} ${q.reward_token} ${q.reward_type === 'performance' ? `× top ${q.winner_count}` : 'per sub'}</span>
-          <span style="color:#888;font-size:.8rem;">Pool: ${q.remaining_pool} ${q.reward_token}</span>
-        </div>
-        <a href="/quest/${q.id}" class="quest-btn" style="display:inline-block;margin-top:12px;">View Quest →</a>
       </div>
-    `).join('');
-  } catch (e) {
-    document.getElementById('quests').innerHTML = '<div class="empty">Failed to load quests</div>';
+    </aside>
+  </section>
+
+  <section>
+    <div class="board-head">
+      <h2 id="board-title">Quests</h2>
+      <div class="tabs" role="tablist" id="tabs">
+        <button role="tab" data-tab="open" class="active">Open now<b id="n-open"></b></button>
+        <button role="tab" data-tab="soon">Opening soon<b id="n-soon"></b></button>
+        <button role="tab" data-tab="closed">Closed<b id="n-closed"></b></button>
+      </div>
+    </div>
+    <div class="ledger" id="quests">
+      <div class="quest"><div class="skeleton quest-cover"></div><div><div class="skeleton" style="width:40%;height:20px"></div><div class="skeleton" style="width:60%;margin-top:10px"></div></div></div>
+      <div class="quest"><div class="skeleton quest-cover"></div><div><div class="skeleton" style="width:35%;height:20px"></div><div class="skeleton" style="width:55%;margin-top:10px"></div></div></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span id="foot-brand">Questboard</span>
+  <span id="foot-note"></span>
+</footer>
+
+<script src="/app.js"></script>
+<script>
+(async function () {
+  const { esc, amount, until, ago, int } = QB;
+  const { cfg } = await QB.renderTopbar('quests');
+  document.getElementById('foot-brand').textContent = cfg.brand.name;
+  document.getElementById('hero-title').textContent = cfg.brand.tagline;
+  document.getElementById('foot-note').textContent = cfg.demo
+    ? 'Demo mode: posts are checked against the text you paste, and payouts are simulated.'
+    : `Posts are verified through ${cfg.provider.label}.`;
+
+  const [{ quests }, stats, { events }] = await Promise.all([
+    QB.api('GET', '/api/quests'), QB.api('GET', '/api/stats'), QB.api('GET', '/api/activity?limit=40'),
+  ]);
+
+  // escrow figure
+  const open = stats.open_pool.filter((p) => p.total > 0);
+  document.getElementById('escrow-amounts').innerHTML = open.length
+    ? open.map((p) => `<span class="amount">${amount(p.total)}<small>${esc(p.token)}</small></span>`).join('')
+    : '<span class="muted">Nothing open yet</span>';
+  const paid = stats.paid_by_token.map((p) => `${amount(p.total)} ${p.token}`).join(' and ');
+  document.getElementById('escrow-sub').textContent = stats.rewards_paid
+    ? `${int(stats.rewards_paid)} payouts so far, ${paid}, to ${int(stats.participants)} creators.`
+    : 'No payouts yet — be the first.';
+  const payouts = events.filter((e) => e.type.startsWith('reward.'));
+  document.getElementById('live').innerHTML = payouts.length
+    ? payouts.slice(0, 4).map((e) => `<div class="live-item"><span>${esc(e.message.replace(/^Simulated payout of /, 'Paid ').replace(/^Paid (.+?) to (.+?)( ·.*)?$/, '$2 received $1'))}</span><span data-ago="${esc(e.created_at)}">${ago(e.created_at)}</span></div>`).join('')
+    : '<div class="live-item"><span class="muted">Waiting for the first verified post</span></div>';
+
+  // board
+  const groups = {
+    open: quests.filter((q) => q.status === 'active' || q.status === 'paused'),
+    soon: quests.filter((q) => q.status === 'scheduled'),
+    closed: quests.filter((q) => q.status === 'completed'),
+  };
+  document.getElementById('n-open').textContent = groups.open.length || '';
+  document.getElementById('n-soon').textContent = groups.soon.length || '';
+  document.getElementById('n-closed').textContent = groups.closed.length || '';
+
+  function rulesLine(q) {
+    const r = q.rules;
+    const bits = [];
+    if (r.required_keywords.length) bits.push(`${r.keyword_mode === 'any' ? 'include one of' : 'include'} ${r.required_keywords.map((k) => `<span class="chip">${esc(k)}</span>`).join(' ')}`);
+    if (r.must_mention.length) bits.push(`mention ${r.must_mention.map((h) => `<b>@${esc(h)}</b>`).join(' and ')}`);
+    if (r.min_chars) bits.push(`write ${int(r.min_chars)}+ characters`);
+    if (!bits.length) return 'Any post about the topic counts.';
+    const sentence = bits.length > 1 ? bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1] : bits[0];
+    return sentence[0].toUpperCase() + sentence.slice(1) + '.';
   }
-}
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-loadQuests();
+
+  function statusTag(q) {
+    if (q.status === 'active') return `<span class="tag tag-active">Open</span>`;
+    if (q.status === 'paused') return `<span class="tag tag-paused">Paused</span>`;
+    if (q.status === 'scheduled') return `<span class="tag tag-scheduled">Opens ${QB.dateShort(q.starts_at)}</span>`;
+    return `<span class="tag tag-completed">Closed</span>`;
+  }
+
+  function render(tab) {
+    const list = groups[tab];
+    const host = document.getElementById('quests');
+    if (!list.length) {
+      const msg = tab === 'open' ? ['No open quests right now.', 'New quests appear here the moment they go live — check back soon.']
+        : tab === 'soon' ? ['Nothing scheduled.', 'Quests with a future start date show up here.']
+        : ['No closed quests yet.', 'Finished quests and their final leaderboards live here.'];
+      host.innerHTML = `<div class="empty"><strong>${msg[0]}</strong>${msg[1]}</div>`;
+      return;
+    }
+    host.innerHTML = list.map((q) => {
+      const perf = q.reward.type === 'performance';
+      const slots = q.limits.max_submissions;
+      const meter = perf
+        ? `<div class="quest-meter"><span>${int(q.stats.verified)} competing for ${q.reward.winner_count} spots</span></div>`
+        : slots
+          ? `<div class="quest-meter"><div class="progress"><i style="width:${Math.min(100, (q.stats.verified / slots) * 100)}%"></i></div><span>${int(q.stats.verified)} of ${int(slots)} slots used</span></div>`
+          : `<div class="quest-meter"><div class="progress"><i style="width:${q.reward.total_pool ? Math.min(100, 100 - (q.reward.remaining_pool / q.reward.total_pool) * 100) : 0}%"></i></div><span>${amount(q.reward.remaining_pool)} ${esc(q.reward.token)} left</span></div>`;
+      const when = q.status === 'completed' ? `Ended <b>${QB.dateShort(q.ends_at || q.finalized_at)}</b>`
+        : q.status === 'scheduled' ? `Opens in <b data-until="${esc(q.starts_at)}">${until(q.starts_at)}</b>`
+        : q.ends_at ? `Ends in <b data-until="${esc(q.ends_at)}">${until(q.ends_at)}</b>` : 'No end date';
+      return `
+        <article class="quest">
+          <div class="quest-cover">${esc(q.cover || '🎯')}</div>
+          <div class="quest-top"><a class="quest-title" href="/quest/${q.id}">${esc(q.title)}</a>${statusTag(q)}</div>
+          <div class="quest-by">Set by <b>@${esc(q.kol_handle || 'questboard')}</b>${perf ? ' — ranked by engagement' : ' — paid per verified post'}</div>
+          <div class="quest-body"><div class="quest-rules">${rulesLine(q)}</div>${meter}</div>
+          <div class="quest-reward">
+            <span class="amount">${amount(q.reward.amount)}<small>${esc(q.reward.token)}</small></span>
+            <span class="per">${perf ? `each, top ${q.reward.winner_count}` : 'per post'}${q.reward.testnet ? ' (testnet)' : ''}</span>
+            <span class="when">${when}</span>
+          </div>
+        </article>`;
+    }).join('');
+  }
+
+  const tabs = document.getElementById('tabs');
+  tabs.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-tab]');
+    if (!b) return;
+    tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('active', x === b));
+    render(b.dataset.tab);
+  });
+  const first = groups.open.length ? 'open' : groups.soon.length ? 'soon' : 'closed';
+  tabs.querySelectorAll('button').forEach((x) => x.classList.toggle('active', x.dataset.tab === first));
+  render(first);
+})().catch((e) => { console.error(e); QB.toast(e.message, 'err'); });
 </script>
 </body>
 </html>
